@@ -1,0 +1,36 @@
+﻿@page "/register"
+@using System.Text.Json
+@inject HttpClient Http
+@inject ILocalStorageService LocatStorage
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthStateProvider
+
+<h3>Register</h3>
+
+<input @bind="username" placeholder="Username" />
+<input @bind="email" placeholder="Email" />
+<input @bind="password" placeholder="Password" />
+<button @onclick="RegisterUser">Register</button>
+
+@code {
+    private string username;
+    private string email;
+    private string password;
+
+
+    private async Task RegisterUser()
+    {
+        var response = await Http.PostAsJsonAsync("/api/auth/register", 
+            new { Username = username, Email = email, Password = password });
+
+        if (response.IsSuccessStatusCode)
+        {
+            Navigation.NavigateTo("/");
+        }
+        else
+        {
+            // TO DO 
+        }
+    }
+}
+

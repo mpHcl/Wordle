@@ -1,16 +1,51 @@
 ﻿@inherits LayoutComponentBase
+@inject ILocalStorageService LocalStorage
+@inject AuthenticationStateProvider AuthProvider
+
 <div class="page">
     <div class="sidebar">
         <NavMenu />
     </div>
 
     <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
-        </div>
+        @if (authState is null)
+        {
+            <p>Loading...</p>
+        }
+        else if (authState.User.Identity?.IsAuthenticated ?? false)
+        {
+            <div class="top-row px-4">
+                <a href="" @onclick="Logout">Log out</a>
+            </div>
+        }
+        else
+        {
+            <div class="top-row px-4">
+                <a href="/login">Log in</a>
+                <a href="/register">Register</a>
+            </div>
+        }
+
 
         <article class="content px-4">
             @Body
         </article>
     </main>
 </div>
+
+@code {
+    private AuthenticationState? authState;
+
+    protected override async Task OnInitializedAsync()
+    {
+        authState = await AuthProvider.GetAuthenticationStateAsync();
+    }
+
+    private async Task Logout()
+    {
+        await LocalStorage.RemoveItemAsync("authToken");
+        ((Client.Auth.JwtAuthenticationStateProvider)AuthProvider).NotifyUserLogout();
+        authState = await AuthProvider.GetAuthenticationStateAsync();
+        StateHasChanged();
+    }
+}

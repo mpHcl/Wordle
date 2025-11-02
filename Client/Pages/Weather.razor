@@ -1,5 +1,6 @@
 ﻿@page "/weather"
 @inject HttpClient Http
+@inject ILocalStorageService LocalStorage
 
 <PageTitle>Weather</PageTitle>
 
@@ -36,12 +37,52 @@ else
     </table>
 }
 
+@if (forecastsSecure == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th aria-label="Temperature in Celsius">Temp. (C)</th>
+                <th aria-label="Temperature in Farenheit">Temp. (F)</th>
+                <th>Summary</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var forecast in forecastsSecure)
+            {
+                <tr>
+                    <td>@forecast.Date.ToShortDateString()</td>
+                    <td>@forecast.TemperatureC</td>
+                    <td>@forecast.TemperatureF</td>
+                    <td>@forecast.Summary</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+
 @code {
     private WeatherForecast[]? forecasts;
+    private WeatherForecast[]? forecastsSecure;
 
     protected override async Task OnInitializedAsync()
     {
         forecasts = await Http.GetFromJsonAsync<WeatherForecast[]>("/api/weatherforecast");
+        try {
+            var token = await LocalStorage.GetItemAsync<string>("authToken");
+            Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            forecastsSecure = await Http.GetFromJsonAsync<WeatherForecast[]>("/api/weatherforecast/secure");
+        }
+        catch (Exception ex) {
+            
+        }
     }
 
     public class WeatherForecast

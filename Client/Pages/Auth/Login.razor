@@ -1,0 +1,35 @@
+﻿@page "/login"
+@using System.Text.Json
+@inject HttpClient Http
+@inject ILocalStorageService LocatStorage
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthStateProvider
+
+
+<h3>Login</h3>
+
+<input @bind="email" placeholder="Email"/>
+<input @bind="password" placeholder="Password" />
+<button @onclick="LoginUser">Log in</button>
+
+@code {
+    private string email;
+    private string password;
+
+
+    private async Task LoginUser()
+    {
+        var response = await Http.PostAsJsonAsync("/api/auth/login", new { Email = email, Password = password });
+        if (response.IsSuccessStatusCode)
+        {
+            var json = await response.Content.ReadFromJsonAsync<JsonElement>();
+            var token = json.GetProperty("token").GetString();
+
+            await LocatStorage.SetItemAsync("authToken", token);
+            ((Client.Auth.JwtAuthenticationStateProvider)AuthStateProvider).NotifyUserAuthentication(token);
+            Http.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("bearer", token);
+
+            Navigation.NavigateTo("/", forceLoad: true);
+        }
+    }
+}
