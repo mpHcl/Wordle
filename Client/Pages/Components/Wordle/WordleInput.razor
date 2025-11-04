@@ -1,0 +1,21 @@
+<div class="input-row">
+    <input value="@CurrentGuess"
+           @oninput="OnInputChanged"
+           maxlength="5"
+           @onkeydown="(e) => HandleKeyDown.InvokeAsync(e)"
+           placeholder="Type your guess"
+           aria-label="Enter guess" />
+    <button class="btn" @onclick="(e) => SubmitGuess.InvokeAsync(e)">Enter</button>
+</div>
+
+@code {
+    [Parameter] public string CurrentGuess { get; set; } = string.Empty;
+    [Parameter] public EventCallback<string> CurrentGuessChanged { get; set; }
+    [Parameter] public EventCallback<KeyboardEventArgs> HandleKeyDown { get; set; }
+    [Parameter] public EventCallback<MouseEventArgs> SubmitGuess { get; set; }
+
+    private async Task OnInputChanged(ChangeEventArgs e)
+    {
+        await CurrentGuessChanged.InvokeAsync(e.Value?.ToString() ?? "");
+    }
+}

@@ -1,0 +1,31 @@
+﻿.cell {
+    width: 64px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #ddd;
+    font-size: 1.25rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    border-radius: 6px;
+}
+
+    .cell.empty {
+        background: white;
+    }
+
+    .cell.absent {
+        background: #d3d6da;
+        color: #000;
+    }
+
+    .cell.present {
+        background: #f7c948;
+        color: #000;
+    }
+
+    .cell.correct {
+        background: #6aaa64;
+        color: #fff;
+    }

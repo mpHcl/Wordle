@@ -1,0 +1,36 @@
+﻿.keyboard {
+    margin-top: 0.75rem;
+}
+
+.kbd-row {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-bottom: 6px;
+}
+
+.kbd-key {
+    padding: 0.45rem 0.7rem;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    min-width: 36px;
+    font-weight: 600;
+}
+
+    .kbd-key.action {
+        min-width: 64px;
+    }
+
+    .kbd-key.absent {
+        background: #d3d6da;
+    }
+
+    .kbd-key.present {
+        background: #f7c948;
+    }
+
+    .kbd-key.correct {
+        background: #6aaa64;
+        color: #fff;
+    }

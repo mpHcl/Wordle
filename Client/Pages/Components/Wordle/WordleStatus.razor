@@ -1,0 +1,19 @@
+@using System.Security.Cryptography
+@using Client.Pages.Components.Wordle
+
+<div class="status">
+    @if (!string.IsNullOrEmpty(Message))
+    {
+        <p>@Message</p>
+    }
+</div>
+
+<style>
+    .status {
+        margin-top: 0.5rem;
+    }
+</style>
+
+@code {
+    [Parameter] public string Message { get; set; } = string.Empty;
+}

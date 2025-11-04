@@ -1,0 +1,41 @@
+﻿<div class="keyboard" role="application" aria-label="Keyboard">
+    @foreach (var row in Layout)
+    {
+        <div class="kbd-row">
+            @foreach (var key in row)
+            {
+                var keyString = $"{key}";
+                <button class="kbd-key @GetKeyClass(key)" @onclick="() => OnKeyPress.InvokeAsync(keyString)">@key</button>
+            }
+        </div>
+    }
+    <div class="kbd-row small">
+        <button class="kbd-key action" @onclick="() => OnKeyPress.InvokeAsync(backspaceString)">⌫</button>
+        <button class="kbd-key action" @onclick="() => OnKeyPress.InvokeAsync(enterString)">Enter</button>
+    </div>
+</div>
+
+@code {
+    [Parameter] public Dictionary<char, CellState> KeyStates { get; set; } = new();
+    [Parameter] public EventCallback<string> OnKeyPress { get; set; }
+
+    string backspaceString = "⌫";
+    string enterString = "Enter";
+
+    readonly string[] Layout = new[] { "qwertyuiop", "asdfghjkl", "zxcvbnm" };
+
+    string currentGuess = string.Empty;
+
+
+    string GetKeyClass(char ch)
+    {
+        if (KeyStates.TryGetValue(ch, out var s)) return s switch
+        {
+            CellState.Absent => "absent",
+            CellState.Present => "present",
+            CellState.Correct => "correct",
+            _ => ""
+        };
+        return string.Empty;
+    }
+}

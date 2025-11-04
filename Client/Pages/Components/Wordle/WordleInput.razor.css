@@ -1,0 +1,21 @@
+﻿.input-row {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 0.75rem;
+}
+
+input {
+    padding: 0.5rem;
+    width: 240px;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.btn {
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+}

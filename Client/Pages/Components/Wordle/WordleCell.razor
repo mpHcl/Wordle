@@ -1,0 +1,16 @@
+﻿<div class="cell @GetClass()" role="gridcell" aria-label=@($"{Letter} {State}")>
+    @Letter
+</div>
+
+@code {
+    [Parameter] public string Letter { get; set; } = "";
+    [Parameter] public CellState State { get; set; }
+
+    string GetClass() => State switch
+    {
+        CellState.Correct => "correct",
+        CellState.Present => "present",
+        CellState.Absent => "absent",
+        _ => "empty"
+    };
+}

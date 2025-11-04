@@ -1,0 +1,32 @@
+@using System.Security.Cryptography
+
+<section class="board" role="grid" aria-label="Wordle board">
+    @for (int r = 0; r < Rows; r++)
+    {
+        <div class="row" role="row">
+            @for (int c = 0; c < Cols; c++)
+            {
+                var letter = Guesses.Count > r ? (c < Guesses[r].Length ? Guesses[r][c].ToString().ToUpper() : "") : "";
+                var status = Evaluation.Count > r ? Evaluation[r].ElementAtOrDefault(c) : CellState.Empty;
+                <WordleCell Letter=@letter State=@status /> 
+            }
+        </div>
+    }
+</section>
+
+
+@code {
+    [Parameter] public int Rows { get; set; } = 6;
+    [Parameter] public int Cols { get; set; } = 5;
+    [Parameter] public List<string> Guesses { get; set; } = new();
+    [Parameter] public List<CellState[]> Evaluation { get; set; } = new();
+
+    string GetCellClass(CellState s) => s switch
+    {
+        CellState.Empty => "empty",
+        CellState.Absent => "absent",
+        CellState.Present => "present",
+        CellState.Correct => "correct",
+        _ => ""
+    };
+}

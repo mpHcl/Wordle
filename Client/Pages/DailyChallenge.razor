@@ -1,0 +1,50 @@
+﻿@page "/"
+@using System.Security.Cryptography
+@using Client.Pages.Components.Wordle
+
+<PageTitle>Daily challenge</PageTitle>
+
+<div class="container">
+    <header>
+        <h1>Daily challenge @DateTime.UtcNow.ToString("yyyy-MM-dd")</h1>
+        <p class="sub">Guess the 5-letter word. You have <strong>6</strong> tries.</p>
+    </header>
+
+    <main>
+        <WordleGame GameId=@NewGameId/>
+
+        <footer>
+            <small>Local demo — replace the in-file wordlist with server-driven daily words for production.</small>
+        </footer>
+    </main>
+</div>
+
+<style>
+    .container {
+        max-width: 720px;
+        margin: 1.5rem auto;
+        padding: 1rem;
+        font-family: system-ui, -apple-system, "Segoe UI", Roboto;
+    }
+
+    header {
+        text-align: center;
+        margin-bottom: 1rem;
+    }
+
+    
+</style>
+
+@code {
+    int NewGameId { get; set; }
+
+    protected override void OnInitialized()
+    {
+        NewGameId = GetNewDailyGame();
+    }
+
+    int GetNewDailyGame()
+    {
+        return 1221;
+    }
+}

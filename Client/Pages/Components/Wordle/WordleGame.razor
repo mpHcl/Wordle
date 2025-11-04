@@ -1,0 +1,60 @@
+﻿@using System.Security.Cryptography
+@using Client.Pages.Components.Wordle
+
+<WordleBoard Cols="5" Rows="6"  Evaluation=@Evaluation Guesses=@GuessHistory/>
+
+<section class="controls">
+    <WordleInput @bind-CurrentGuess="Current" HandleKeyDown=@HandleKeyDown SubmitGuess=@SubmitGuess />
+    <WordleKeyboard KeyStates="@KeyStates" OnKeyPress="@HandleKeyPress" />
+    <WordleStatus Message="@Message" />
+</section>
+
+<style>
+    .controls {
+        margin-top: 1rem;
+        text-align: center;
+    }
+</style>
+
+@code {
+    [Parameter] public int GameId { get; set; }
+    List<string> GuessHistory = new();
+    List<CellState[]> Evaluation = new();
+    Dictionary<char, CellState> KeyStates = new();
+    string Solution = "apple";
+    string Current = "";
+    string Message = "";
+
+    void HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter") SubmitGuess();
+        else if (e.Key == "Backspace" && Current.Length > 0)
+            Current = Current[..^1];
+    }
+
+    void HandleKeyPress(string key)
+    {
+        if (key == "Enter") SubmitGuess();
+        else if (key == "⌫" && Current.Length > 0) Current = Current[..^1];
+        else if (key.Length == 1 && char.IsLetter(key[0]) && Current.Length < 5)
+            Current += key.ToLower();
+    }
+
+    void SubmitGuess()
+    {
+        if (Current.Length < 5) return;
+        GuessHistory.Add(Current);
+        Evaluation.Add(Evaluate(Current, Solution));
+        Current = "";
+    }
+
+    CellState[] Evaluate(string guess, string solution)
+    {
+        var result = new CellState[5];
+        for (int i = 0; i < 5; i++)
+            result[i] = guess[i] == solution[i] ? CellState.Correct :
+                        solution.Contains(guess[i]) ? CellState.Present :
+                        CellState.Absent;
+        return result;
+    }
+}

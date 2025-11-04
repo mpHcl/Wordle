@@ -1,0 +1,12 @@
+﻿.board {
+    display: grid;
+    gap: 8px;
+    margin: 1rem 0;
+}
+
+.row {
+    display: grid;
+    grid-template-columns: repeat(5, 64px);
+    gap: 8px;
+    justify-content: center;
+}
