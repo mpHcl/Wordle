@@ -1,0 +1,23 @@
+@using System.Globalization
+
+<tr class="hover:bg-gray-50">
+    <td class="border border-gray-300 px-4 py-2">
+        @if (GameHistoryItem.Won)
+        {
+            <span>@GameHistoryItem.GuessedWord</span>
+        }
+        else
+        {
+            <span class="text-gray-500 italic">Unfinished</span>
+        }
+    </td>
+    <td class="border border-gray-300 px-4 py-2">@GameHistoryItem.Tries</td>
+    <td class="border border-gray-300 px-4 py-2">
+        @GameHistoryItem.Date.ToString("MMM dd, yyyy", CultureInfo.InvariantCulture)
+    </td>
+    <td class="border border-gray-300 px-4 py-2">@GameHistoryItem.Category</td>
+</tr>
+
+@code {
+    [Parameter] public GameHistoryItem GameHistoryItem { get; set; } = default!;
+}

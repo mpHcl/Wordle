@@ -1,0 +1,30 @@
+@using System.Globalization
+@using Client.Pages.Components.GameHistory
+
+@if (GamesHistory.Count == 0)
+{
+    <p>No games played yet.</p>
+}
+else
+{
+    <table class="table-auto w-full border-collapse border border-gray-300">
+        <thead class="bg-gray-100">
+            <tr>
+                <th class="border border-gray-300 px-4 py-2 text-left">Game</th>
+                <th class="border border-gray-300 px-4 py-2 text-left">Tries</th>
+                <th class="border border-gray-300 px-4 py-2 text-left">Date</th>
+                <th class="border border-gray-300 px-4 py-2 text-left">Category</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var gameHistoryEntry in GamesHistory)
+            {
+                <GameHistoryRow GameHistoryItem=gameHistoryEntry/>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    [Parameter] public List<GameHistoryItem> GamesHistory { get; set; } = new();
+}
