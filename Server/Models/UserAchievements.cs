@@ -1,7 +1,5 @@
-﻿namespace Server.Models
-{
-    public class UserAchievements
-    {
+﻿namespace Server.Models {
+    public class UserAchievements {
         public required string UserId { get; set; }
         public WordleUser? User { get; set; }
         public int AchievementId { get; set; }

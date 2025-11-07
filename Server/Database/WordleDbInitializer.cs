@@ -1,44 +1,40 @@
-﻿namespace Server.Database
-{
-    public static class WordleDbInitializer
-    {
-        public static void Seed(WordleDbContext dbContext)
-        {
+﻿namespace Server.Database {
+    public static class WordleDbInitializer {
+        public static void Seed(WordleDbContext dbContext) {
             dbContext.Database.EnsureCreated();
 
-            if (!dbContext.WordCategories.Any() || !dbContext.Words.Any())
-            {
+            if (!dbContext.WordCategories.Any() || !dbContext.Words.Any()) {
                 var defaultCategories = new List<Models.WordCategory>
                 {
                     new Models.WordCategory
                     {
-                        Name = "Nature", 
+                        Name = "Nature",
                         Description = "Covers animals, plants, weather, and landscapes."
-                    }, 
-                    new Models.WordCategory 
-                    { 
-                        Name = "Adjectives", 
-                        Description = "Describes people, things, or concepts, yielding descriptive and common words." 
-                    }, 
-                    new Models.WordCategory 
-                    { 
-                        Name = "People", 
-                        Description = "Focuses on titles, relationships, or occupations." 
-                    }, 
-                    new Models.WordCategory 
-                    { 
-                        Name = "Geography", 
+                    },
+                    new Models.WordCategory
+                    {
+                        Name = "Adjectives",
+                        Description = "Describes people, things, or concepts, yielding descriptive and common words."
+                    },
+                    new Models.WordCategory
+                    {
+                        Name = "People",
+                        Description = "Focuses on titles, relationships, or occupations."
+                    },
+                    new Models.WordCategory
+                    {
+                        Name = "Geography",
                         Description = "Focuses on places, movement, and features found around the world. Offers many unique letter combinations."
                     },
-                    new Models.WordCategory 
-                    { 
-                        Name = "Food & Drink", 
+                    new Models.WordCategory
+                    {
+                        Name = "Food & Drink",
                         Description = "Includes common food items, beverages, and culinary terms."
                     },
                 };
                 dbContext.WordCategories.AddRange(defaultCategories);
                 dbContext.SaveChanges();
-                
+
                 var category = defaultCategories.ToDictionary(c => c.Name, c => c);
 
 

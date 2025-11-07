@@ -12,29 +12,24 @@ using Shared.Dtos.Auth;
 using System.Security.Claims;
 
 
-namespace Server.Controllers
-{
+namespace Server.Controllers {
     [Route("api/[controller]")]
     [ApiController]
-    public class AuthController : ControllerBase
-    {
+    public class AuthController : ControllerBase {
         private readonly UserManager<WordleUser> _userManager;
         private readonly IConfiguration configuration;
 
-        public AuthController(UserManager<WordleUser> userManager, IConfiguration configuration)
-        {
+        public AuthController(UserManager<WordleUser> userManager, IConfiguration configuration) {
             _userManager = userManager;
             this.configuration = configuration;
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register(RegisterDto dto)
-        {
+        public async Task<IActionResult> Register(RegisterDto dto) {
             var user = new WordleUser { UserName = dto.UserName, Email = dto.Email };
             var result = await _userManager.CreateAsync(user, dto.Password);
 
-            if (!result.Succeeded)
-            {
+            if (!result.Succeeded) {
                 return BadRequest(result.Errors);
             }
 
@@ -42,18 +37,15 @@ namespace Server.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login(LoginDto dto)
-        {
+        public async Task<IActionResult> Login(LoginDto dto) {
             var user = await _userManager.FindByEmailAsync(dto.Email);
-            if (user == null  || !await _userManager.CheckPasswordAsync(user, dto.Password))
-            {
+            if (user == null || !await _userManager.CheckPasswordAsync(user, dto.Password)) {
                 return Unauthorized(new { Message = "Invalid email or password" });
             }
 
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.UTF8.GetBytes(configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT Key not found in configuration."));
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
+            var tokenDescriptor = new SecurityTokenDescriptor {
                 Subject = new ClaimsIdentity(
                 [
                     new Claim(ClaimTypes.Name, user.UserName ?? throw new InvalidDataException($"User {user.Id}, does not have username.")),

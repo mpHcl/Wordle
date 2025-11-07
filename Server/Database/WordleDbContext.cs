@@ -2,10 +2,8 @@
 using Microsoft.EntityFrameworkCore;
 using Server.Models;
 
-namespace Server.Database
-{
-    public class WordleDbContext : IdentityDbContext<WordleUser>
-    {
+namespace Server.Database {
+    public class WordleDbContext : IdentityDbContext<WordleUser> {
         public DbSet<Achievements> Achievements { get; set; }
         public DbSet<DailyChallenge> DailyChallenges { get; set; }
         public DbSet<Game> Games { get; set; }
@@ -16,13 +14,11 @@ namespace Server.Database
         public DbSet<WordCategory> WordCategories { get; set; }
         public DbSet<WordleSettings> WordleSettings { get; set; }
 
-        public WordleDbContext(DbContextOptions<WordleDbContext> options) : base(options)
-        {
-            
+        public WordleDbContext(DbContextOptions<WordleDbContext> options) : base(options) {
+
         }
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
+        protected override void OnModelCreating(ModelBuilder modelBuilder) {
             base.OnModelCreating(modelBuilder);
 
             // --- Word ↔ Category

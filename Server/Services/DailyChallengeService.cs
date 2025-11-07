@@ -3,20 +3,16 @@ using Server.Database;
 using Server.Models;
 using Shared.Dtos;
 
-namespace Server.Services
-{
-    public class DailyChallengeService : IDailyChallengeService
-    {
+namespace Server.Services {
+    public class DailyChallengeService : IDailyChallengeService {
         private readonly WordleDbContext _context;
         private static readonly Random _random = new();
 
 
-        public DailyChallengeService(WordleDbContext context)
-        {
+        public DailyChallengeService(WordleDbContext context) {
             _context = context;
         }
-        public async Task<DailyChallengeDto> CreateToday()
-        {
+        public async Task<DailyChallengeDto> CreateToday() {
             var today = DateTime.UtcNow.Date;
 
             // Prevent duplicates
@@ -29,23 +25,21 @@ namespace Server.Services
             var randomWordId = wordsIds[_random.Next(0, wordsIds.Count)];
             var word = await _context.Words.FirstAsync(w => w.Id == randomWordId);
 
-            var dailyChallenge = new DailyChallenge
-            {
+            var dailyChallenge = new DailyChallenge {
                 Date = DateOnly.FromDateTime(today),
                 WordId = word.Id,
                 Word = word
             };
-            
+
             _context.DailyChallenges.Add(dailyChallenge);
             await _context.SaveChangesAsync();
 
             return new DailyChallengeDto { ChallengeId = dailyChallenge.Id };
         }
 
-        public async Task<DailyChallengeDto?> GetToday()
-        {
+        public async Task<DailyChallengeDto?> GetToday() {
             var today = DateTime.UtcNow.Date;
-            var dailyChallenge =  await _context.DailyChallenges.FirstOrDefaultAsync(
+            var dailyChallenge = await _context.DailyChallenges.FirstOrDefaultAsync(
                 dc => dc.Date == DateOnly.FromDateTime(today)
             );
 

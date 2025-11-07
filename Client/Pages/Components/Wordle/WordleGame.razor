@@ -5,19 +5,18 @@
 @inject HttpClient Http
 @inject ILocalStorageService LocalStorage
 
-@if (GameDto == null)
-{
+@if (GameDto == null) {
     <p>Loading game...</p>
     return;
 }
 else {
-<WordleBoard Cols="5" Rows="6" History=@GameDto?.Attempts />
+    <WordleBoard Cols="5" Rows="6" History=@GameDto?.Attempts />
 
-<section class="controls">
-    <WordleInput @bind-CurrentGuess="Current" HandleKeyDown=@HandleKeyDown SubmitGuess=@SubmitGuess />
-    <WordleKeyboard KeyStates="@KeyStates" OnKeyPress="@HandleKeyPress" />
-    <WordleStatus Message="@Message" />
-</section>
+    <section class="controls">
+        <WordleInput @bind-CurrentGuess="Current" HandleKeyDown=@HandleKeyDown SubmitGuess=@SubmitGuess />
+        <WordleKeyboard KeyStates="@KeyStates" OnKeyPress="@HandleKeyPress" />
+        <WordleStatus Message="@Message" />
+    </section>
 }
 
 
@@ -36,48 +35,93 @@ else {
     string Current = "";
     string Message = "";
 
+    protected override void OnParametersSet() {
+        if (GameDto is not null) {
+            CalculateKeyStates();
+        }
+    }
+
     async Task HandleKeyDown(KeyboardEventArgs e) {
-        if (e.Key == "Enter") await SubmitGuess();
-        else if (e.Key == "Backspace" && Current.Length > 0)
+        if (e.Key == "Enter") {
+            await SubmitGuess();
+        }
+        else if (e.Key == "Backspace" && Current.Length > 0) {
             Current = Current[..^1];
+        }
     }
 
-    async Task HandleKeyPress(string key)
-    {
-        if (key == "Enter") await SubmitGuess();
-        else if (key == "⌫" && Current.Length > 0) Current = Current[..^1];
-        else if (key.Length == 1 && char.IsLetter(key[0]) && Current.Length < 5)
+    async Task HandleKeyPress(string key) {
+        if (key == "Enter") {
+            await SubmitGuess();
+        }
+        else if (key == "⌫" && Current.Length > 0) {
+            Current = Current[..^1];
+        }
+        else if (key.Length == 1 && char.IsLetter(key[0]) && Current.Length < 5) {
             Current += key.ToLower();
+        }
     }
 
-    async Task SubmitGuess()
-    {
+    async Task SubmitGuess() {
         if (Current.Length < 5) return;
 
-        try
-        {
+        try {
             var token = await LocalStorage.GetItemAsync<string>("authToken");
             Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
             var response = await Http.PostAsJsonAsync($"/api/game/{GameDto?.Id}/attempt", Current);
-            if (response.IsSuccessStatusCode)
-            {
+            if (response.IsSuccessStatusCode) {
                 GameDto = await response.Content.ReadFromJsonAsync<GameDto>();
             }
-        } catch (Exception ex)
-        {
+        }
+        catch (Exception ex) {
 
         }
-        Current = "";
+        finally {
+            CalculateKeyStates();
+            Current = "";
+        }
     }
 
-    CellState[] Evaluate(string guess, string solution)
-    {
-        var result = new CellState[5];
-        for (int i = 0; i < 5; i++)
-            result[i] = guess[i] == solution[i] ? CellState.Correct :
-                        solution.Contains(guess[i]) ? CellState.Present :
-                        CellState.Absent;
-        return result;
+    private void CalculateKeyStates() {
+        KeyStates.Clear();
+
+        foreach (var attempt in GameDto!.Attempts) {
+            if (string.IsNullOrEmpty(attempt.Attempt))
+                continue;
+
+            for (int i = 0; i < attempt.Attempt.Length && i < attempt.LettersState.Count(); i++) {
+                char letter = char.ToLower(attempt.Attempt[i]);
+                var newState = attempt.LettersState.ElementAt(i) switch {
+                    State.LetterGuessedCorrectPlace => CellState.Correct,
+                    State.LetterGuessedIncorrectPlace => CellState.Present,
+                    _ => CellState.Absent
+                };
+
+                if (KeyStates.TryGetValue(letter, out var currentState)) {
+                    if (IsStrongerState(newState, currentState))
+                        KeyStates[letter] = newState;
+                }
+                else {
+                    KeyStates[letter] = newState;
+                }
+            }
+        }
+
+        // Debug print
+        foreach (var kvp in KeyStates) {
+            Console.WriteLine($"{kvp.Key} - {kvp.Value}");
+        }
+    }
+
+    private bool IsStrongerState(CellState newState, CellState currentState) {
+        // Correct > Present > Absent
+        int Priority(CellState s) => s switch {
+            CellState.Correct => 3,
+            CellState.Present => 2,
+            _ => 1
+        };
+
+        return Priority(newState) > Priority(currentState);
     }
 }

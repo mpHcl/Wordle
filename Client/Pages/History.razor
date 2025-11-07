@@ -6,21 +6,18 @@
 <PageTitle>Game History</PageTitle>
 
 <h1 class="text-2xl font-bold mb-4">Game History</h1>
-@if (gamesHistory != null)
-{
+@if (gamesHistory != null) {
     <GameHistory GamesHistory=gamesHistory />
 }
-else
-{
+else {
     <p>Loading</p>
 }
 
 @code {
     private List<GameHistoryItem>? gamesHistory;
 
-    protected override async Task OnInitializedAsync()
-    {
-        await Task.Delay(300); 
+    protected override async Task OnInitializedAsync() {
+        await Task.Delay(300);
         gamesHistory = GetMockHistory();
     }
 

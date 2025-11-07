@@ -6,8 +6,7 @@
     [Parameter] public string Letter { get; set; } = "";
     [Parameter] public CellState State { get; set; }
 
-    string GetClass() => State switch
-    {
+    string GetClass() => State switch {
         CellState.Correct => "correct",
         CellState.Present => "present",
         CellState.Absent => "absent",

@@ -14,8 +14,7 @@
     [Parameter] public EventCallback<KeyboardEventArgs> HandleKeyDown { get; set; }
     [Parameter] public EventCallback<MouseEventArgs> SubmitGuess { get; set; }
 
-    private async Task OnInputChanged(ChangeEventArgs e)
-    {
+    private async Task OnInputChanged(ChangeEventArgs e) {
         await CurrentGuessChanged.InvokeAsync(e.Value?.ToString() ?? "");
     }
 }

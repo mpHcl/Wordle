@@ -18,7 +18,7 @@
     </header>
 
     <main>
-        <WordleGame GameDto=@NewGame/>
+        <WordleGame GameDto=@NewGame />
 
         <footer>
             <small>Local demo — replace the in-file wordlist with server-driven daily words for production.</small>
@@ -39,28 +39,23 @@
         margin-bottom: 1rem;
     }
 
-    
 </style>
 
 @code {
     GameDto? NewGame { get; set; }
 
-    protected override async Task OnInitializedAsync()
-    {
+    protected override async Task OnInitializedAsync() {
         await GetNewDailyGameAsync();
     }
 
-    async Task GetNewDailyGameAsync()
-    {
-        try
-        {
+    async Task GetNewDailyGameAsync() {
+        try {
             var token = await LocalStorage.GetItemAsync<string>("authToken");
             Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
             NewGame = await Http.GetFromJsonAsync<GameDto>("/api/game/daily_challenge");
         }
-        catch (Exception ex)
-        {
+        catch (Exception ex) {
 
         }
     }

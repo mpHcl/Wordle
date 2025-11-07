@@ -1,7 +1,5 @@
-﻿namespace Server.Models
-{
-    public class Leaderboard
-    {
+﻿namespace Server.Models {
+    public class Leaderboard {
         public int Id { get; set; }
         public required string UserId { get; set; }
         public WordleUser? User { get; set; }

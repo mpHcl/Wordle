@@ -2,12 +2,10 @@
 
 <tr class="hover:bg-gray-50">
     <td class="border border-gray-300 px-4 py-2">
-        @if (GameHistoryItem.Won)
-        {
+        @if (GameHistoryItem.Won) {
             <span>@GameHistoryItem.GuessedWord</span>
         }
-        else
-        {
+        else {
             <span class="text-gray-500 italic">Unfinished</span>
         }
     </td>

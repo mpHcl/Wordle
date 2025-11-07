@@ -1,7 +1,5 @@
-﻿namespace Server.Models
-{
-    public class Word
-    {
+﻿namespace Server.Models {
+    public class Word {
         public int Id { get; set; }
         public required string Text { get; set; }
         public int CategoryId { get; set; }

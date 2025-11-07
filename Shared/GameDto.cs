@@ -4,11 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Shared
-{
-    public enum State
-    {
-        LetterGuessedCorrectPlace, 
+namespace Shared {
+    public enum State {
+        LetterGuessedCorrectPlace,
         LetterGuessedIncorrectPlace,
         LetterNotGuessed
     }
@@ -20,13 +18,12 @@ namespace Shared
     }
     public class AttemptDto {
         public string Attempt { get; set; } = string.Empty;
-        public IEnumerable<State> LettersState { get; set; } = new List<State>();
+        public List<State> LettersState { get; set; } = new List<State>();
 
     }
-    public class GameDto
-    {
+    public class GameDto {
         public int Id { get; set; }
         public GameStatus GameStaus { get; set; }
-        public IEnumerable<AttemptDto> Attempts { get; set; } = new List<AttemptDto>();
+        public List<AttemptDto> Attempts { get; set; } = new List<AttemptDto>();
     }
 }

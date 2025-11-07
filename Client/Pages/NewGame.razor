@@ -1,32 +1,33 @@
 ﻿@page "/new-game"
 @using System.Security.Cryptography
 @using Client.Pages.Components.Wordle
+@using Shared
+
+@inject HttpClient Http
+@inject ILocalStorageService LocalStorage
 
 <PageTitle>New game</PageTitle>
 
 <div class="container">
-    @if (newGame != null)
-    {
+    @if (Game != null) {
         <header>
             <h1>New game</h1>
             <p class="sub">
-                Guess the 5-letter word. You have <strong>6</strong> tries. 
-                @if (newGame.Category != "NoHintsMode")
-                {
-                    <span> Category: <strong>@newGame.Category</strong></span>
-                }
+                Guess the 5-letter word. You have <strong>6</strong> tries.
+                @* @if (Game.Category != "NoHintsMode") {
+                    <span> Category: <strong>@Game.Category</strong></span>
+                } *@
             </p>
         </header>
 
         <main>
-            @* <WordleGame GameDto=@newGame.GameId /> *@
+            <WordleGame GameDto=@Game />
             <footer>
                 <small>Local demo — replace the in-file wordlist with server-driven daily words for production.</small>
             </footer>
         </main>
     }
-    else
-    {
+    else {
         <p>Loading new game...</p>
     }
 </div>
@@ -47,21 +48,21 @@
 </style>
 
 @code {
-    public class GameInfo
-    {
-        public int GameId { get; set; }
-        public string Category { get; set; } = string.Empty;
+    GameDto? Game { get; set; }
+
+    protected override async Task OnInitializedAsync() {
+        await GetNewGameAsync();
     }
 
-    GameInfo newGame = new GameInfo();
+    async Task GetNewGameAsync() {
+        try {
+            var token = await LocalStorage.GetItemAsync<string>("authToken");
+            Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-    protected override void OnInitialized()
-    {
-        newGame = GetNewGame();
-    }
+            Game = await Http.GetFromJsonAsync<GameDto>("/api/game/new_game");
+        }
+        catch (Exception ex) {
 
-    GameInfo GetNewGame()
-    {
-        return new GameInfo { GameId = 1221, Category = "Nature" };
+        }
     }
 }

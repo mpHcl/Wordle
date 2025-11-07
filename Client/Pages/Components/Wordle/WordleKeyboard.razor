@@ -1,9 +1,7 @@
 ﻿<div class="keyboard" role="application" aria-label="Keyboard">
-    @foreach (var row in Layout)
-    {
+    @foreach (var row in Layout) {
         <div class="kbd-row">
-            @foreach (var key in row)
-            {
+            @foreach (var key in row) {
                 var keyString = $"{key}";
                 <button class="kbd-key @GetKeyClass(key)" @onclick="() => OnKeyPress.InvokeAsync(keyString)">@key</button>
             }
@@ -27,10 +25,8 @@
     string currentGuess = string.Empty;
 
 
-    string GetKeyClass(char ch)
-    {
-        if (KeyStates.TryGetValue(ch, out var s)) return s switch
-        {
+    string GetKeyClass(char ch) {
+        if (KeyStates.TryGetValue(ch, out var s)) return s switch {
             CellState.Absent => "absent",
             CellState.Present => "present",
             CellState.Correct => "correct",
