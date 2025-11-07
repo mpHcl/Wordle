@@ -1,0 +1,23 @@
+﻿@page "/logout"
+@inject ILocalStorageService LocalStorage
+@inject AuthenticationStateProvider AuthProvider
+@inject NavigationManager Navigation
+
+<p>Logging out please wait</p>
+
+@code {
+    private AuthenticationState? authState;
+
+    protected override async Task OnInitializedAsync() {
+        authState = await AuthProvider.GetAuthenticationStateAsync();
+        await LogoutFunc();
+    }
+
+    private async Task LogoutFunc() {
+        await LocalStorage.RemoveItemAsync("authToken");
+        ((Client.Auth.JwtAuthenticationStateProvider)AuthProvider).NotifyUserLogout();
+        authState = await AuthProvider.GetAuthenticationStateAsync();
+        StateHasChanged();
+        Navigation.NavigateTo("/login");
+    }
+}

@@ -1,51 +1,59 @@
 ﻿@inherits LayoutComponentBase
 @inject ILocalStorageService LocalStorage
 @inject AuthenticationStateProvider AuthProvider
+@inject NavigationManager Navigation
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
+@if (!hideLayout) {
+    <div class="page">
+        <div class="sidebar">
+            <NavMenu />
+        </div>
+
+        <main>
+            @if (authState is null) {
+                <p>Loading...</p>
+            }
+            else if (authState.User.Identity?.IsAuthenticated ?? false) {
+                <div class="top-row px-4">
+                    <a href="logout">Log out</a>
+                </div>
+            }
+            else {
+                <div class="top-row px-4">
+                    <a href="/login">Log in</a>
+                    <a href="/register">Register</a>
+                </div>
+            }
+
+
+            <article class="content px-4">
+                @Body
+            </article>
+        </main>
     </div>
-
-    <main>
-        @if (authState is null)
-        {
-            <p>Loading...</p>
-        }
-        else if (authState.User.Identity?.IsAuthenticated ?? false)
-        {
-            <div class="top-row px-4">
-                <a href="" @onclick="Logout">Log out</a>
-            </div>
-        }
-        else
-        {
-            <div class="top-row px-4">
-                <a href="/login">Log in</a>
-                <a href="/register">Register</a>
-            </div>
-        }
-
-
-        <article class="content px-4">
-            @Body
-        </article>
-    </main>
-</div>
+}
+else {
+    @Body
+}
 
 @code {
     private AuthenticationState? authState;
+    private bool hideLayout;
 
-    protected override async Task OnInitializedAsync()
-    {
+
+    protected override async Task OnInitializedAsync() {
+        if (!await LocalStorage.ContainKeyAsync("authToken"))
+        {
+             Navigation.NavigateTo("/login");
+        }
         authState = await AuthProvider.GetAuthenticationStateAsync();
+        UpdateLayoutVisibility();
+        Navigation.LocationChanged += (_, __) => UpdateLayoutVisibility();
     }
 
-    private async Task Logout()
-    {
-        await LocalStorage.RemoveItemAsync("authToken");
-        ((Client.Auth.JwtAuthenticationStateProvider)AuthProvider).NotifyUserLogout();
-        authState = await AuthProvider.GetAuthenticationStateAsync();
-        StateHasChanged();
+    private void UpdateLayoutVisibility() {
+        var currentUri = Navigation.ToBaseRelativePath(Navigation.Uri).ToLower();
+        hideLayout = currentUri.StartsWith("login") || currentUri.StartsWith("register");
+        InvokeAsync(StateHasChanged);
     }
 }
