@@ -2,16 +2,45 @@
 using Server.Database;
 using Server.Models;
 using Shared;
+using System;
 
 namespace Server.Services
 {
     public class WordleGameService : IWordleGameService
     {
         private readonly WordleDbContext _context;
+        private static readonly Random _random = new();
 
         public WordleGameService(WordleDbContext context)
         {
             _context = context;
+        }
+
+        private static IEnumerable<State> CalculateLetterState(GameAttempt attempt) {
+            var wordExpected = attempt.Game?.Word?.Text;
+            var wordAttempted = attempt.AttemptedWord;
+
+            if (wordExpected is null)
+            {
+                return new List<State>();
+            }
+
+            var result = new List<State>();
+            for (int i = 0; i < wordAttempted.Length; i++)
+            {
+                if (wordAttempted[i] == wordExpected[i])
+                {
+                    result.Add(State.LetterGuessedCorrectPlace);
+                } else if (wordExpected.Contains(wordAttempted[i]))
+                {
+                    result.Add(State.LetterGuessedIncorrectPlace);
+                } else
+                {
+                    result.Add(State.LetterNotGuessed);
+                }
+            }
+
+            return result;  
         }
 
         public async Task<GameDto> GetOrCreateGameForDailyChallenge(int challengeId, string userId)
@@ -26,7 +55,7 @@ namespace Server.Services
                 .Select(game => new GameDto
                 {
                     Id = game.Id,
-                    IsWon = game.IsWon,
+                    GameStaus = CalculateStatus(game),
                     Attempts = game.Attempts.Select(a => new AttemptDto 
                     { 
                         Attempt = a.AttemptedWord, 
@@ -34,37 +63,6 @@ namespace Server.Services
                     }).ToList()
                 })
                 .FirstOrDefaultAsync();
-        }
-
-        private IEnumerable<State> CalculateLetterState(GameAttempt attempt)
-        {
-            var wordExpected = attempt.Game?.Word?.Text;
-            var wordAttempted = attempt.AttemptedWord;
-            
-            if (wordExpected is null)
-            {
-                return new List<State>();
-            }
-
-            var result = new List<State>();
-            for (int i = 0; i < wordAttempted.Length; i++)
-            {
-                if (wordAttempted[i] == wordExpected[i])
-                {
-                    result.Add(State.LetterGuessedCorrectPlace);
-                }
-
-                else if (wordExpected.Contains(wordAttempted[i]))
-                {
-                    result.Add(State.LetterGuessedIncorrectPlace);
-                }
-                else
-                {
-                    result.Add(State.LetterNotGuessed);
-                }
-            }
-
-            return result;
         }
 
         private async Task<GameDto> CreateChallengeGame(int challengeId, string userId)
@@ -79,11 +77,95 @@ namespace Server.Services
             var gameDto = new GameDto
             {
                 Id = game.Id,
-                IsWon = game.IsWon,
+                GameStaus = CalculateStatus(game),
                 Attempts = new List<AttemptDto>()
             };
 
             return gameDto;
+        }
+
+        public async Task<GameDto> CreateNewGame(string userId) 
+        {
+            var user = await _context.Users.FirstAsync(u => u.Id == userId);
+            var wordsIds = await _context.Words.Select(w => w.Id).ToListAsync();
+            var randomWordId = wordsIds[_random.Next(0, wordsIds.Count)];
+            var randomWord = await _context.Words.FirstAsync(w => w.Id == randomWordId);
+
+            var game = new Game { User = user, UserId = userId, Word = randomWord, WordId = randomWord.Id };
+
+            _context.Games.Add(game);
+            _context.SaveChanges();
+
+            var gameDto = new GameDto
+            {
+                Id = game.Id,
+                GameStaus = CalculateStatus(game),
+                Attempts = new List<AttemptDto>()
+            };
+
+            return gameDto;
+        }
+
+        private static GameStatus CalculateStatus(Game game) 
+        {
+            if (game.IsWon)
+            {
+                return GameStatus.Won;
+            } 
+            else if (game.Attempts.Count == 6)
+            {
+                return GameStatus.Finished;
+            } 
+            else
+            {
+                return GameStatus.InProgress;
+            }
+        }
+        public async Task<GameDto> MakeAttempt(int gameId, string attempt, string userId) {
+            var game = await _context.Games
+                .Include(g => g.Attempts)
+                .Where(g => g.Id == gameId && g.UserId == userId)
+                .FirstOrDefaultAsync();
+
+            if (game == null)
+            {
+                throw new Exception("Game not found for this user.");
+            }
+
+            var gameStatus = CalculateStatus(game);
+
+            if (gameStatus != GameStatus.InProgress)
+            {
+                throw new Exception("Game already finished.");
+            }
+
+            var newAttempt = new GameAttempt() 
+            { 
+                Game = game, 
+                GameId = game.Id, 
+                AttemptedWord=attempt, 
+                AttemptedAt = DateTime.Now 
+            };
+
+            await _context.AddAsync(newAttempt);
+
+            if (game.Word?.Text == attempt)
+            {
+                game.IsWon = true;
+            }
+
+            await _context.SaveChangesAsync();
+
+            return new GameDto()
+            {
+                Id = game.Id,
+                Attempts = game.Attempts.Select(a => new AttemptDto()
+                {
+                    Attempt = a.AttemptedWord,
+                    LettersState = CalculateLetterState(a)
+                }),
+                GameStaus = CalculateStatus(game),
+            };
         }
     }
 }

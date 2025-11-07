@@ -1,4 +1,5 @@
 @using System.Security.Cryptography
+@using Shared
 
 <section class="board" role="grid" aria-label="Wordle board">
     @for (int r = 0; r < Rows; r++)
@@ -6,8 +7,8 @@
         <div class="row" role="row">
             @for (int c = 0; c < Cols; c++)
             {
-                var letter = Guesses.Count > r ? (c < Guesses[r].Length ? Guesses[r][c].ToString().ToUpper() : "") : "";
-                var status = Evaluation.Count > r ? Evaluation[r].ElementAtOrDefault(c) : CellState.Empty;
+                var letter = guesses.Count > r ? (c < guesses[r].Length ? guesses[r][c].ToString().ToUpper() : "") : "";
+                var status = evaluation.Count > r ? evaluation[r].ElementAtOrDefault(c) : CellState.Empty;
                 <WordleCell Letter=@letter State=@status /> 
             }
         </div>
@@ -18,8 +19,59 @@
 @code {
     [Parameter] public int Rows { get; set; } = 6;
     [Parameter] public int Cols { get; set; } = 5;
-    [Parameter] public List<string> Guesses { get; set; } = new();
-    [Parameter] public List<CellState[]> Evaluation { get; set; } = new();
+    [Parameter] public IEnumerable<AttemptDto> History { get; set; } = new List<AttemptDto>();
+    List<string> guesses= new();
+    List<CellState[]> evaluation = new();
+
+    protected override void OnInitialized()
+    {
+        guesses.Clear();
+        evaluation.Clear();
+
+        if (History != null)
+        {
+            foreach (var attempt in History)
+            {
+                guesses.Add(attempt.Attempt);
+                foreach (var state in attempt.LettersState)
+                {
+                    Console.WriteLine($"{state}");
+                }
+                evaluation.Add(attempt.LettersState.Select(e => e switch {
+                    State.LetterGuessedCorrectPlace => CellState.Correct,
+                    State.LetterGuessedIncorrectPlace => CellState.Present,
+                    State.LetterNotGuessed => CellState.Absent,
+                    _ => CellState.Empty // optional fallback
+                }).ToArray());
+
+            }
+        }
+    }
+    protected override void OnParametersSet() {
+        // Rebuild guesses and evaluation lists when History changes
+        guesses.Clear();
+        evaluation.Clear();
+
+        if (History != null)
+        {
+            foreach (var attempt in History)
+            {
+                guesses.Add(attempt.Attempt);
+                foreach (var state in attempt.LettersState)
+                {
+                    Console.WriteLine($"{state}");
+                }
+                evaluation.Add(attempt.LettersState.Select(e => e switch {
+                    State.LetterGuessedCorrectPlace => CellState.Correct,
+                    State.LetterGuessedIncorrectPlace => CellState.Present,
+                    State.LetterNotGuessed => CellState.Absent,
+                    _ => CellState.Empty // optional fallback
+                }).ToArray());
+
+            }
+        }
+    }
+
 
     string GetCellClass(CellState s) => s switch
     {

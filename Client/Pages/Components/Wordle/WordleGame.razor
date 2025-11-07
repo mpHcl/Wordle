@@ -2,13 +2,16 @@
 @using Client.Pages.Components.Wordle
 @using Shared
 
+@inject HttpClient Http
+@inject ILocalStorageService LocalStorage
+
 @if (GameDto == null)
 {
     <p>Loading game...</p>
     return;
 }
 else {
-<WordleBoard Cols="5" Rows="6" Evaluation=@Evaluation Guesses=@GuessHistory />
+<WordleBoard Cols="5" Rows="6" History=@GameDto?.Attempts />
 
 <section class="controls">
     <WordleInput @bind-CurrentGuess="Current" HandleKeyDown=@HandleKeyDown SubmitGuess=@SubmitGuess />
@@ -27,35 +30,44 @@ else {
 
 @code {
     [Parameter] public GameDto? GameDto { get; set; }
-    List<string> GuessHistory = new();
     List<CellState[]> Evaluation = new();
     Dictionary<char, CellState> KeyStates = new();
     string Solution = "apple";
     string Current = "";
     string Message = "";
 
-    void HandleKeyDown(KeyboardEventArgs e)
-    {
-        if (e.Key == "Enter") SubmitGuess();
+    async Task HandleKeyDown(KeyboardEventArgs e) {
+        if (e.Key == "Enter") await SubmitGuess();
         else if (e.Key == "Backspace" && Current.Length > 0)
             Current = Current[..^1];
     }
 
-    void HandleKeyPress(string key)
+    async Task HandleKeyPress(string key)
     {
-        if (key == "Enter") SubmitGuess();
+        if (key == "Enter") await SubmitGuess();
         else if (key == "⌫" && Current.Length > 0) Current = Current[..^1];
         else if (key.Length == 1 && char.IsLetter(key[0]) && Current.Length < 5)
             Current += key.ToLower();
     }
 
-    void SubmitGuess()
+    async Task SubmitGuess()
     {
         if (Current.Length < 5) return;
 
+        try
+        {
+            var token = await LocalStorage.GetItemAsync<string>("authToken");
+            Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-        GuessHistory.Add(Current);
-        Evaluation.Add(Evaluate(Current, Solution));
+            var response = await Http.PostAsJsonAsync($"/api/game/{GameDto?.Id}/attempt", Current);
+            if (response.IsSuccessStatusCode)
+            {
+                GameDto = await response.Content.ReadFromJsonAsync<GameDto>();
+            }
+        } catch (Exception ex)
+        {
+
+        }
         Current = "";
     }
 

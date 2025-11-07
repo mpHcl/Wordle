@@ -12,6 +12,12 @@ namespace Shared
         LetterGuessedIncorrectPlace,
         LetterNotGuessed
     }
+
+    public enum GameStatus {
+        Won,
+        Finished,
+        InProgress
+    }
     public class AttemptDto {
         public string Attempt { get; set; } = string.Empty;
         public IEnumerable<State> LettersState { get; set; } = new List<State>();
@@ -20,7 +26,7 @@ namespace Shared
     public class GameDto
     {
         public int Id { get; set; }
-        public bool IsWon { get; set; }
+        public GameStatus GameStaus { get; set; }
         public IEnumerable<AttemptDto> Attempts { get; set; } = new List<AttemptDto>();
     }
 }

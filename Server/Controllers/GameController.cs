@@ -10,19 +10,19 @@ namespace Server.Controllers
 {
     [ApiController]
     [Route("/api/[controller]")]
-    public class DailyChallengeController : ControllerBase
+    public class GameController : ControllerBase
     {
         private readonly IDailyChallengeService _dailyChallengeService;
         private readonly IWordleGameService _wordleGameService;
 
-        public DailyChallengeController(IDailyChallengeService dailyChallengeService, IWordleGameService wordleGameService)
+        public GameController(IDailyChallengeService dailyChallengeService, IWordleGameService wordleGameService)
         {
             _dailyChallengeService = dailyChallengeService;
             _wordleGameService = wordleGameService;
         }
         
         [Authorize]
-        [HttpGet("game")]
+        [HttpGet("daily_challenge")]
         public async Task<IActionResult> GetDailyChallenge()
         {
             var todaysChallange = await _dailyChallengeService.GetToday();
@@ -37,6 +37,22 @@ namespace Server.Controllers
             var gameDto = await _wordleGameService.GetOrCreateGameForDailyChallenge(todaysChallange.ChallengeId, userId);
 
             return Ok(gameDto);
+        }
+
+        [Authorize]
+        [HttpGet("new_game")]
+        public async Task<IActionResult> GetNewGame() 
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value!;
+            return Ok(await _wordleGameService.CreateNewGame(userId));
+        }
+
+        [Authorize]
+        [HttpPost("{gameId}/attempt")]
+        public async Task<IActionResult> PostAttempt(int gameId, [FromBody] string attempt) 
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value!;
+            return Ok(await _wordleGameService.MakeAttempt(gameId, attempt, userId));
         }
     }
 }
