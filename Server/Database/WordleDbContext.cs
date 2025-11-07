@@ -46,6 +46,12 @@ namespace Server.Database
                 .HasForeignKey(g => g.WordId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<Game>()
+                .HasOne(g => g.DailyChallenge)
+                .WithMany()
+                .HasForeignKey(g => g.DailyChallangeId)
+                .OnDelete(DeleteBehavior.Restrict);
+
             // --- GameAttempt ↔ Game (many attempts per game)
             modelBuilder.Entity<GameAttempt>()
                 .HasOne(ga => ga.Game)

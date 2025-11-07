@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Server.Database;
 using Server.Models;
+using Server.Services;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -44,6 +45,10 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+builder.Services.AddScoped<IDailyChallengeService, DailyChallengeService>();
+builder.Services.AddScoped<IWordleGameService, WordleGameService>();
+
+
 var app = builder.Build();
 
 
@@ -71,6 +76,14 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapRazorPages();
+
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var dbContext = services.GetRequiredService<WordleDbContext>();
+    WordleDbInitializer.Seed(dbContext);
+}
+
 app.MapControllers();
 app.MapFallbackToFile("index.html");
 

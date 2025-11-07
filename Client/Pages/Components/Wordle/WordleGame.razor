@@ -1,13 +1,22 @@
 ﻿@using System.Security.Cryptography
 @using Client.Pages.Components.Wordle
+@using Shared
 
-<WordleBoard Cols="5" Rows="6"  Evaluation=@Evaluation Guesses=@GuessHistory/>
+@if (GameDto == null)
+{
+    <p>Loading game...</p>
+    return;
+}
+else {
+<WordleBoard Cols="5" Rows="6" Evaluation=@Evaluation Guesses=@GuessHistory />
 
 <section class="controls">
     <WordleInput @bind-CurrentGuess="Current" HandleKeyDown=@HandleKeyDown SubmitGuess=@SubmitGuess />
     <WordleKeyboard KeyStates="@KeyStates" OnKeyPress="@HandleKeyPress" />
     <WordleStatus Message="@Message" />
 </section>
+}
+
 
 <style>
     .controls {
@@ -17,7 +26,7 @@
 </style>
 
 @code {
-    [Parameter] public int GameId { get; set; }
+    [Parameter] public GameDto? GameDto { get; set; }
     List<string> GuessHistory = new();
     List<CellState[]> Evaluation = new();
     Dictionary<char, CellState> KeyStates = new();
@@ -43,6 +52,8 @@
     void SubmitGuess()
     {
         if (Current.Length < 5) return;
+
+
         GuessHistory.Add(Current);
         Evaluation.Add(Evaluate(Current, Solution));
         Current = "";
