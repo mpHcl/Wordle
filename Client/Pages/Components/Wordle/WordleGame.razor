@@ -45,9 +45,6 @@ else {
         if (e.Key == "Enter") {
             await SubmitGuess();
         }
-        else if (e.Key == "Backspace" && Current.Length > 0) {
-            Current = Current[..^1];
-        }
     }
 
     async Task HandleKeyPress(string key) {

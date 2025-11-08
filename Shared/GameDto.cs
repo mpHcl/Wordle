@@ -25,5 +25,6 @@ namespace Shared {
         public int Id { get; set; }
         public GameStatus GameStaus { get; set; }
         public List<AttemptDto> Attempts { get; set; } = new List<AttemptDto>();
+        public string? Word { get; set; }
     }
 }

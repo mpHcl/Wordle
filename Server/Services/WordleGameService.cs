@@ -54,13 +54,15 @@ namespace Server.Services {
                 return null;
             }
 
+            var gameStatus = CalculateStatus(game);
             var result = new GameDto() {
                 Id = game.Id,
-                GameStaus = CalculateStatus(game),
+                GameStaus = gameStatus,
                 Attempts = game.Attempts.Select(a => new AttemptDto {
                     Attempt = a.AttemptedWord,
                     LettersState = CalculateLetterState(a)
-                }).ToList()
+                }).ToList(),
+                Word = gameStatus != GameStatus.InProgress ? game.Word?.Text : null
             };
 
             return result;
@@ -147,13 +149,15 @@ namespace Server.Services {
 
             await _context.SaveChangesAsync();
 
+            gameStatus = CalculateStatus(game);
             return new GameDto() {
                 Id = game.Id,
                 Attempts = game.Attempts.Select(a => new AttemptDto() {
                     Attempt = a.AttemptedWord,
                     LettersState = CalculateLetterState(a)
                 }).ToList(),
-                GameStaus = CalculateStatus(game),
+                GameStaus = gameStatus,
+                Word = gameStatus != GameStatus.InProgress ? game.Word?.Text : null
             };
         }
     }
