@@ -1,7 +1,11 @@
 ﻿@page "/history"
 
+@inject ILocalStorageService LocalStorage
+@inject HttpClient Http
+
 @using System.Globalization
 @using Client.Pages.Components.GameHistory
+@using Shared
 
 <PageTitle>Game History</PageTitle>
 
@@ -14,18 +18,21 @@ else {
 }
 
 @code {
-    private List<GameHistoryItem>? gamesHistory;
+    private IEnumerable<GameDto>? gamesHistory;
 
     protected override async Task OnInitializedAsync() {
-        await Task.Delay(300);
-        gamesHistory = GetMockHistory();
+        await GetHistory();
     }
 
-    private List<GameHistoryItem> GetMockHistory() => new()
-    {
-        new GameHistoryItem { Won = true, GuessedWord = "APPLE", Tries = 4, Date = DateTime.Now.AddDays(-1), Category = "Fruits" },
-        new GameHistoryItem { Won = false, GuessedWord = "", Tries = 2, Date = DateTime.Now.AddDays(-2), Category = "Animals" },
-        new GameHistoryItem { Won = true, GuessedWord = "MUSIC", Tries = 5, Date = DateTime.Now.AddDays(-3), Category = "Art" },
-        new GameHistoryItem { Won = true, GuessedWord = "BRICK", Tries = 3, Date = DateTime.Now.AddDays(-5), Category = "Objects" }
-    };
-}
+    async Task GetHistory() {
+        try {
+            var token = await LocalStorage.GetItemAsync<string>("authToken");
+            Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            gamesHistory = await Http.GetFromJsonAsync<IEnumerable<GameDto>>("/api/game/games");
+        }
+        catch (Exception ex) {
+
+        }
+    }
+ }

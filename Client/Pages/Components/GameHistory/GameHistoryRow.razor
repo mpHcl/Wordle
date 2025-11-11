@@ -1,21 +1,23 @@
 @using System.Globalization
+@using Shared
 
 <tr class="hover:bg-gray-50">
     <td class="border border-gray-300 px-4 py-2">
-        @if (GameHistoryItem.Won) {
-            <span>@GameHistoryItem.GuessedWord</span>
+        @if (GameHistoryItem.Word is not null) {
+            <span>@GameHistoryItem.Word</span>
         }
         else {
             <span class="text-gray-500 italic">Unfinished</span>
         }
     </td>
-    <td class="border border-gray-300 px-4 py-2">@GameHistoryItem.Tries</td>
+    <td class="border border-gray-300 px-4 py-2">@GameHistoryItem.Attempts.Count</td>
     <td class="border border-gray-300 px-4 py-2">
-        @GameHistoryItem.Date.ToString("MMM dd, yyyy", CultureInfo.InvariantCulture)
+        @* @GameHistoryItem.Date.ToString("MMM dd, yyyy", CultureInfo.InvariantCulture) *@
     </td>
-    <td class="border border-gray-300 px-4 py-2">@GameHistoryItem.Category</td>
+    <td class="border border-gray-300 px-4 py-2">@GameHistoryItem.GameStaus</td>
+    <td class="border border-gray-300 px-4 py-2"><a href="/game/@GameHistoryItem.Id">Open</a></td>
 </tr>
 
 @code {
-    [Parameter] public GameHistoryItem GameHistoryItem { get; set; } = default!;
+    [Parameter] public GameDto GameHistoryItem { get; set; } = default!;
 }

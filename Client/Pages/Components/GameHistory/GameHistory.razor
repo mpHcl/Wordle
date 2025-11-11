@@ -1,7 +1,8 @@
 @using System.Globalization
 @using Client.Pages.Components.GameHistory
+@using Shared
 
-@if (GamesHistory.Count == 0) {
+@if (GamesHistory?.Count() == 0) {
     <p>No games played yet.</p>
 }
 else {
@@ -12,16 +13,20 @@ else {
                 <th class="border border-gray-300 px-4 py-2 text-left">Tries</th>
                 <th class="border border-gray-300 px-4 py-2 text-left">Date</th>
                 <th class="border border-gray-300 px-4 py-2 text-left">Category</th>
+                <th class="border border-gray-300 px-4 py-2 text-left">Link</th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var gameHistoryEntry in GamesHistory) {
-                <GameHistoryRow GameHistoryItem=gameHistoryEntry />
+            @if (GamesHistory is not null)
+            {
+                @foreach (var gameHistoryEntry in GamesHistory) {
+                    <GameHistoryRow GameHistoryItem=gameHistoryEntry />
+                }
             }
         </tbody>
     </table>
 }
 
 @code {
-    [Parameter] public List<GameHistoryItem> GamesHistory { get; set; } = new();
+    [Parameter] public IEnumerable<GameDto>? GamesHistory { get; set; }
 }

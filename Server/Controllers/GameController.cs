@@ -53,5 +53,30 @@ namespace Server.Controllers {
                 return Conflict(new { message = ex.Message });
             }
         }
+
+        [Authorize]
+        [HttpGet("games")]
+        public async Task<IActionResult> GetGames([FromQuery] int page = 1, [FromQuery] int pageSize = 10) {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value!;
+
+            var skip = (page - 1) * pageSize;
+            var games = await _wordleGameService.GetUserGamesAsync(userId, skip, pageSize);
+
+            return Ok(games);
+        }
+
+        [Authorize]
+        [HttpGet("{GameId}")]
+        public async Task<IActionResult> GetGame(int gameId) {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value!;
+
+            var game = await _wordleGameService.GetGameByIdAsync(userId, gameId);
+
+            if (game is null) {
+                return NotFound();
+            }
+
+            return Ok(game);
+        }
     }
 }

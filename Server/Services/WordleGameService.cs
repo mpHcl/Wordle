@@ -160,5 +160,42 @@ namespace Server.Services {
                 Word = gameStatus != GameStatus.InProgress ? game.Word?.Text : null
             };
         }
+
+        public async Task<IEnumerable<GameDto>> GetUserGamesAsync(string userId, int skip, int pageSize) {
+            var games = await _context.Games.Where(g => g.UserId == userId)
+                .Include(g => g.Attempts)
+                .Include(g => g.Word)
+                .OrderByDescending(g => g.Id)
+                .Skip(skip)
+                .Take(pageSize)
+                .Select(g => new GameDto {
+                    Id = g.Id,
+                    GameStaus = CalculateStatus(g),
+                    Attempts = g.Attempts.Select(a => new AttemptDto {
+                        Attempt = a.AttemptedWord,
+                        LettersState = CalculateLetterState(a)
+                    }).ToList(),
+                    Word = CalculateStatus(g) != GameStatus.InProgress ? g.Word!.Text : null
+                }).ToListAsync();
+            
+            return games;
+        }
+
+        public async Task<GameDto?> GetGameByIdAsync(string userId, int gameId) {
+            var games = await _context.Games.Where(g => g.UserId == userId && g.Id == gameId)
+                .Include(g => g.Attempts)
+                .Include(g => g.Word)
+                .Select(g => new GameDto {
+                    Id = g.Id,
+                    GameStaus = CalculateStatus(g),
+                    Attempts = g.Attempts.Select(a => new AttemptDto {
+                        Attempt = a.AttemptedWord,
+                        LettersState = CalculateLetterState(a)
+                    }).ToList(),
+                    Word = CalculateStatus(g) != GameStatus.InProgress ? g.Word!.Text : null
+                }).FirstOrDefaultAsync();
+
+            return games;
+        }
     }
 }
