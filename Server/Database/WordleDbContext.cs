@@ -4,7 +4,7 @@ using Server.Models;
 
 namespace Server.Database {
     public class WordleDbContext : IdentityDbContext<WordleUser> {
-        public DbSet<Achievements> Achievements { get; set; }
+        public DbSet<Achievement> Achievements { get; set; }
         public DbSet<DailyChallenge> DailyChallenges { get; set; }
         public DbSet<Game> Games { get; set; }
         public DbSet<GameAttempt> GameAttempts { get; set; }

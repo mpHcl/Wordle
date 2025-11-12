@@ -1,5 +1,5 @@
 ﻿@page "/login"
-@using System.Text.Json
+@using Shared.Dtos.Auth
 @inject HttpClient Http
 @inject ILocalStorageService LocatStorage
 @inject NavigationManager Navigation
@@ -84,10 +84,16 @@
     private async Task LoginUser() {
         var response = await Http.PostAsJsonAsync("/api/auth/login", new { Email = email, Password = password });
         if (response.IsSuccessStatusCode) {
-            var json = await response.Content.ReadFromJsonAsync<JsonElement>();
-            var token = json.GetProperty("token").GetString();
+            var responseDto = await response.Content.ReadFromJsonAsync<LoginResponseDto>() ?? throw new Exception("User not found");
+
+            var token = responseDto.Token;
 
             await LocatStorage.SetItemAsync("authToken", token);
+            await LocatStorage.SetItemAsync("darkMode", responseDto.Settings.DarkMode);
+            await LocatStorage.SetItemAsync("hardMode", responseDto.Settings.HardMode);
+            await LocatStorage.SetItemAsync("highContrastMode", responseDto.Settings.HighContrastMode);
+            await LocatStorage.SetItemAsync("hints", responseDto.Settings.ShowHints);
+
             ((Client.Auth.JwtAuthenticationStateProvider)AuthStateProvider).NotifyUserAuthentication(token);
             Http.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("bearer", token);
 

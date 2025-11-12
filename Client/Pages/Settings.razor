@@ -1,0 +1,72 @@
+﻿@page "/settings"
+@using Shared.Dtos
+@inject HttpClient Http
+@inject ILocalStorageService LocalStorage
+
+<h3>Settings</h3>
+
+@if (settings == null) {
+    <p>Loading...</p>
+}
+else {
+    <EditForm Model="settings" OnValidSubmit="SaveSettings">
+        <div class="form-check">
+            <InputCheckbox @bind-Value="settings.DarkMode" class="form-check-input" />
+            <label class="form-check-label">Dark Mode</label>
+        </div>
+
+        <div class="form-check">
+            <InputCheckbox @bind-Value="settings.HardMode" class="form-check-input" />
+            <label class="form-check-label">Hard Mode</label>
+        </div>
+
+        <div class="form-check">
+            <InputCheckbox @bind-Value="settings.HighContrastMode" class="form-check-input" />
+            <label class="form-check-label">High Contrast Mode</label>
+        </div>
+
+        <div class="form-check">
+            <InputCheckbox @bind-Value="settings.ShowHints" class="form-check-input" />
+            <label class="form-check-label">Show Hints</label>
+        </div>
+
+        <button type="submit" class="btn btn-primary mt-3">Save</button>
+
+        @if (message != null) {
+            <div class="alert alert-info mt-3">@message</div>
+        }
+    </EditForm>
+}
+
+@code {
+    private SettingsDto? settings;
+    private string? message;
+
+    protected override async Task OnInitializedAsync() {
+        try {
+            var token = await LocalStorage.GetItemAsync<string>("authToken");
+            Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            settings = await Http.GetFromJsonAsync<SettingsDto>("api/settings");
+        }
+        catch (Exception ex) {
+            message = $"Error loading settings: {ex.Message}";
+        }
+    }
+
+    private async Task SaveSettings() {
+        try {
+            var token = await LocalStorage.GetItemAsync<string>("authToken");
+            Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            var response = await Http.PostAsJsonAsync("api/settings", settings);
+            if (response.IsSuccessStatusCode) {
+                message = "Settings saved successfully.";
+            }
+            else {
+                message = $"Failed to save settings: {response.StatusCode}";
+            }
+        }
+        catch (Exception ex) {
+            message = $"Error saving settings: {ex.Message}";
+        }
+    }
+}

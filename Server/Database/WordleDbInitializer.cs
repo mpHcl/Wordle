@@ -4,105 +4,134 @@
             dbContext.Database.EnsureCreated();
 
             if (!dbContext.WordCategories.Any() || !dbContext.Words.Any()) {
-                var defaultCategories = new List<Models.WordCategory>
-                {
-                    new Models.WordCategory
-                    {
-                        Name = "Nature",
-                        Description = "Covers animals, plants, weather, and landscapes."
-                    },
-                    new Models.WordCategory
-                    {
-                        Name = "Adjectives",
-                        Description = "Describes people, things, or concepts, yielding descriptive and common words."
-                    },
-                    new Models.WordCategory
-                    {
-                        Name = "People",
-                        Description = "Focuses on titles, relationships, or occupations."
-                    },
-                    new Models.WordCategory
-                    {
-                        Name = "Geography",
-                        Description = "Focuses on places, movement, and features found around the world. Offers many unique letter combinations."
-                    },
-                    new Models.WordCategory
-                    {
-                        Name = "Food & Drink",
-                        Description = "Includes common food items, beverages, and culinary terms."
-                    },
-                };
-                dbContext.WordCategories.AddRange(defaultCategories);
-                dbContext.SaveChanges();
-
+                var defaultCategories = InitCategories(dbContext);
                 var category = defaultCategories.ToDictionary(c => c.Name, c => c);
-
-
-                var defaultWords = new List<Models.Word>
-                {
-                    // nature
-                    new Models.Word { Text = "RIVER", Category = category["Nature"] },
-                    new Models.Word { Text = "BEACH", Category = category["Nature"]  },
-                    new Models.Word { Text = "SHORE", Category = category["Nature"] },
-                    new Models.Word { Text = "FOGGY", Category = category["Nature"] },
-                    new Models.Word { Text = "WOODS", Category = category["Nature"] },
-                    new Models.Word { Text = "PLANT", Category = category["Nature"] },
-                    new Models.Word { Text = "EARTH", Category = category["Nature"] },
-                    new Models.Word { Text = "BLOSS", Category = category["Nature"] },
-                    new Models.Word { Text = "CAVEA", Category = category["Nature"] },
-                    new Models.Word { Text = "SWAMP", Category = category["Nature"] },
-
-                    // Adjectives
-                    new Models.Word { Text = "HEAVY", Category = category["Adjectives"] },
-                    new Models.Word { Text = "WEIRD", Category = category["Adjectives"] },
-                    new Models.Word { Text = "SUREL", Category = category["Adjectives"] },
-                    new Models.Word { Text = "TIDAL", Category = category["Adjectives"] },
-                    new Models.Word { Text = "WORSE", Category = category["Adjectives"] },
-                    new Models.Word { Text = "READY", Category = category["Adjectives"] },
-                    new Models.Word { Text = "FRESH", Category = category["Adjectives"] },
-                    new Models.Word { Text = "GRAND", Category = category["Adjectives"] },
-                    new Models.Word { Text = "JOLLY", Category = category["Adjectives"] },
-                    new Models.Word { Text = "SWEET", Category = category["Adjectives"] },
-
-                    // People
-                    new Models.Word { Text = "NURSE", Category = category["People"] },
-                    new Models.Word { Text = "PILOT", Category = category["People"] },
-                    new Models.Word { Text = "JUDGE", Category = category["People"] },
-                    new Models.Word { Text = "YOUTH", Category = category["People"] },
-                    new Models.Word { Text = "CHILD", Category = category["People"] },
-                    new Models.Word { Text = "WIVES", Category = category["People"] },
-                    new Models.Word { Text = "CROWD", Category = category["People"] },
-                    new Models.Word { Text = "LEADS", Category = category["People"] },
-                    new Models.Word { Text = "SQUAD", Category = category["People"] },
-
-                    // Geography
-                    new Models.Word { Text = "EGYPT", Category = category["Geography"] },
-                    new Models.Word { Text = "MALTA", Category = category["Geography"] },
-                    new Models.Word { Text = "BENIN", Category = category["Geography"] },
-                    new Models.Word { Text = "GABON", Category = category["Geography"] },
-                    new Models.Word { Text = "CHILE", Category = category["Geography"] },
-                    new Models.Word { Text = "CHINA", Category = category["Geography"] },
-                    new Models.Word { Text = "GHANA", Category = category["Geography"] },
-                    new Models.Word { Text = "ITALY", Category = category["Geography"] },
-                    new Models.Word { Text = "JAPAN", Category = category["Geography"] },
-                    new Models.Word { Text = "IDNIA", Category = category["Geography"] },
-                
-                    // Food & drink
-                    new Models.Word { Text = "APPLE", Category = category["Food & Drink"] },
-                    new Models.Word { Text = "BACON", Category = category["Food & Drink"] },
-                    new Models.Word { Text = "BEANS", Category = category["Food & Drink"] },
-                    new Models.Word { Text = "BAGEL", Category = category["Food & Drink"] },
-                    new Models.Word { Text = "BERRY", Category = category["Food & Drink"] },
-                    new Models.Word { Text = "COCOA", Category = category["Food & Drink"] },
-                    new Models.Word { Text = "FRIES", Category = category["Food & Drink"] },
-                    new Models.Word { Text = "DOUGH", Category = category["Food & Drink"] },
-                    new Models.Word { Text = "CREAM", Category = category["Food & Drink"] },
-                    new Models.Word { Text = "BREAD", Category = category["Food & Drink"] },
-
-                };
-                dbContext.Words.AddRange(defaultWords);
-                dbContext.SaveChanges();
+                InitWords(dbContext, category);
             }
+
+            if (!dbContext.Achievements.Any()) {
+                InitAchievements(dbContext);
+            }
+        }
+
+        private static void InitAchievements(WordleDbContext dbContext) {
+            var defaultAchievements = new List<Models.Achievement> 
+            {
+                new () {
+                    Name = "First Solve!",
+                    Description = "Solve a Wordle game.",
+                },
+                new() {
+                    Name = "First Try!",
+                    Description = "Solve a Wordle on your first attempt.",
+                },
+                new () {
+                    Name = "Persistent Player",
+                    Description = "Play Wordle for 7 consecutive days.",
+                },
+                new () {
+                    Name = "Category Master",
+                    Description = "Solve 5 Wordles from each category.",
+                },
+            };
+            dbContext.Achievements.AddRange(defaultAchievements);
+            dbContext.SaveChanges();
+        }
+
+        private static void InitWords(WordleDbContext dbContext, Dictionary<string, Models.WordCategory> category) {
+            var defaultWords = new List<Models.Word>
+            {
+                // nature
+                new() { Text = "RIVER", Category = category["Nature"] },
+                new() { Text = "BEACH", Category = category["Nature"]  },
+                new() { Text = "SHORE", Category = category["Nature"] },
+                new() { Text = "FOGGY", Category = category["Nature"] },
+                new() { Text = "WOODS", Category = category["Nature"] },
+                new() { Text = "PLANT", Category = category["Nature"] },
+                new() { Text = "EARTH", Category = category["Nature"] },
+                new() { Text = "BLOSS", Category = category["Nature"] },
+                new() { Text = "CAVEA", Category = category["Nature"] },
+                new() { Text = "SWAMP", Category = category["Nature"] },
+
+                // Adjectives
+                new() { Text = "HEAVY", Category = category["Adjectives"] },
+                new() { Text = "WEIRD", Category = category["Adjectives"] },
+                new() { Text = "SUREL", Category = category["Adjectives"] },
+                new() { Text = "TIDAL", Category = category["Adjectives"] },
+                new() { Text = "WORSE", Category = category["Adjectives"] },
+                new() { Text = "READY", Category = category["Adjectives"] },
+                new() { Text = "FRESH", Category = category["Adjectives"] },
+                new() { Text = "GRAND", Category = category["Adjectives"] },
+                new() { Text = "JOLLY", Category = category["Adjectives"] },
+                new() { Text = "SWEET", Category = category["Adjectives"] },
+
+                // People
+                new() { Text = "NURSE", Category = category["People"] },
+                new() { Text = "PILOT", Category = category["People"] },
+                new() { Text = "JUDGE", Category = category["People"] },
+                new() { Text = "YOUTH", Category = category["People"] },
+                new() { Text = "CHILD", Category = category["People"] },
+                new() { Text = "WIVES", Category = category["People"] },
+                new() { Text = "CROWD", Category = category["People"] },
+                new() { Text = "LEADS", Category = category["People"] },
+                new() { Text = "SQUAD", Category = category["People"] },
+
+                // Geography
+                new() { Text = "EGYPT", Category = category["Geography"] },
+                new() { Text = "MALTA", Category = category["Geography"] },
+                new() { Text = "BENIN", Category = category["Geography"] },
+                new() { Text = "GABON", Category = category["Geography"] },
+                new() { Text = "CHILE", Category = category["Geography"] },
+                new() { Text = "CHINA", Category = category["Geography"] },
+                new() { Text = "GHANA", Category = category["Geography"] },
+                new() { Text = "ITALY", Category = category["Geography"] },
+                new() { Text = "JAPAN", Category = category["Geography"] },
+                new() { Text = "IDNIA", Category = category["Geography"] },
+                
+                // Food & drink
+                new() { Text = "APPLE", Category = category["Food & Drink"] },
+                new() { Text = "BACON", Category = category["Food & Drink"] },
+                new() { Text = "BEANS", Category = category["Food & Drink"] },
+                new() { Text = "BAGEL", Category = category["Food & Drink"] },
+                new() { Text = "BERRY", Category = category["Food & Drink"] },
+                new() { Text = "COCOA", Category = category["Food & Drink"] },
+                new() { Text = "FRIES", Category = category["Food & Drink"] },
+                new() { Text = "DOUGH", Category = category["Food & Drink"] },
+                new() { Text = "CREAM", Category = category["Food & Drink"] },
+                new() { Text = "BREAD", Category = category["Food & Drink"] },
+
+            };
+            dbContext.Words.AddRange(defaultWords);
+            dbContext.SaveChanges();
+        }
+
+        private static List<Models.WordCategory> InitCategories(WordleDbContext dbContext) {
+            var defaultCategories = new List<Models.WordCategory>
+            {
+                new () {
+                    Name = "Nature",
+                    Description = "Covers animals, plants, weather, and landscapes."
+                },
+                new () {
+                    Name = "Adjectives",
+                    Description = "Describes people, things, or concepts, yielding descriptive and common words."
+                },
+                new () {
+                    Name = "People",
+                    Description = "Focuses on titles, relationships, or occupations."
+                },
+                new () {
+                    Name = "Geography",
+                    Description = "Focuses on places, movement, and features found around the world. Offers many unique letter combinations."
+                },
+                new () {
+                    Name = "Food & Drink",
+                    Description = "Includes common food items, beverages, and culinary terms."
+                },
+            };
+            dbContext.WordCategories.AddRange(defaultCategories);
+            dbContext.SaveChanges();
+            return defaultCategories;
         }
     }
 }

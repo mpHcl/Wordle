@@ -6,11 +6,11 @@ namespace Server.Models {
         public int SettingsId { get; set; }
         public WordleSettings Settings { get; set; } = new WordleSettings();
 
-        public ICollection<UserAchievements> UserAchievements { get; set; } = new List<UserAchievements>();
+        public ICollection<UserAchievements> UserAchievements { get; set; } = [];
 
-        public ICollection<Game> Games { get; set; } = new List<Game>();
+        public ICollection<Game> Games { get; set; } = [];
 
         [NotMapped]
-        public IEnumerable<Achievements> Achievements => UserAchievements?.Select(ua => ua.Achievement);
+        public IEnumerable<Achievement?>? Achievements => UserAchievements?.Select(ua => ua.Achievement);
     }
 }

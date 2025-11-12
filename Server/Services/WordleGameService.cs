@@ -2,24 +2,20 @@
 using Server.Database;
 using Server.Exceptions;
 using Server.Models;
-using Shared;
+using Shared.Dtos;
 using System;
 
 namespace Server.Services {
-    public class WordleGameService : IWordleGameService {
-        private readonly WordleDbContext _context;
+    public class WordleGameService(WordleDbContext context) : IWordleGameService {
+        private readonly WordleDbContext _context = context;
         private static readonly Random _random = new();
-
-        public WordleGameService(WordleDbContext context) {
-            _context = context;
-        }
 
         private static List<State> CalculateLetterState(GameAttempt attempt) {
             var wordExpected = attempt.Game?.Word?.Text.ToUpper();
             var wordAttempted = attempt.AttemptedWord.ToUpper();
 
             if (wordExpected is null) {
-                return new List<State>();
+                return [];
             }
 
             var result = new List<State>();
@@ -58,10 +54,10 @@ namespace Server.Services {
             var result = new GameDto() {
                 Id = game.Id,
                 GameStaus = gameStatus,
-                Attempts = game.Attempts.Select(a => new AttemptDto {
+                Attempts = [.. game.Attempts.Select(a => new AttemptDto {
                     Attempt = a.AttemptedWord,
                     LettersState = CalculateLetterState(a)
-                }).ToList(),
+                })],
                 Word = gameStatus != GameStatus.InProgress ? game.Word?.Text : null
             };
 
@@ -79,7 +75,7 @@ namespace Server.Services {
             var gameDto = new GameDto {
                 Id = game.Id,
                 GameStaus = CalculateStatus(game),
-                Attempts = new List<AttemptDto>()
+                Attempts = []
             };
 
             return gameDto;
@@ -99,7 +95,7 @@ namespace Server.Services {
             var gameDto = new GameDto {
                 Id = game.Id,
                 GameStaus = CalculateStatus(game),
-                Attempts = new List<AttemptDto>()
+                Attempts = []
             };
 
             return gameDto;
@@ -122,11 +118,7 @@ namespace Server.Services {
                 .Include(g => g.Attempts)
                 .Include(g => g.Word)
                 .Where(g => g.Id == gameId && g.UserId == userId)
-                .FirstOrDefaultAsync();
-
-            if (game == null) {
-                throw new Exception("Game not found for this user.");
-            }
+                .FirstOrDefaultAsync() ?? throw new Exception("Game not found for this user.");
 
             var gameStatus = CalculateStatus(game);
 
@@ -152,10 +144,10 @@ namespace Server.Services {
             gameStatus = CalculateStatus(game);
             return new GameDto() {
                 Id = game.Id,
-                Attempts = game.Attempts.Select(a => new AttemptDto() {
+                Attempts = [.. game.Attempts.Select(a => new AttemptDto() {
                     Attempt = a.AttemptedWord,
                     LettersState = CalculateLetterState(a)
-                }).ToList(),
+                })],
                 GameStaus = gameStatus,
                 Word = gameStatus != GameStatus.InProgress ? game.Word?.Text : null
             };

@@ -56,7 +56,7 @@
             NewGame = await Http.GetFromJsonAsync<GameDto>("/api/game/daily_challenge");
         }
         catch (Exception ex) {
-
+            Console.WriteLine(ex.Message);
         }
     }
 }

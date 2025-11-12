@@ -1,5 +1,4 @@
-﻿
-using Shared;
+﻿using Shared.Dtos;
 
 namespace Server.Services {
     public interface IWordleGameService {

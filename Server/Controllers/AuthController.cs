@@ -10,19 +10,17 @@ using Microsoft.IdentityModel.Tokens;
 using Server.Models;
 using Shared.Dtos.Auth;
 using System.Security.Claims;
+using Server.Database;
+using Microsoft.EntityFrameworkCore;
 
 
 namespace Server.Controllers {
     [Route("api/[controller]")]
     [ApiController]
-    public class AuthController : ControllerBase {
-        private readonly UserManager<WordleUser> _userManager;
-        private readonly IConfiguration configuration;
-
-        public AuthController(UserManager<WordleUser> userManager, IConfiguration configuration) {
-            _userManager = userManager;
-            this.configuration = configuration;
-        }
+    public class AuthController(UserManager<WordleUser> userManager, WordleDbContext context, IConfiguration configuration) : ControllerBase {
+        private readonly UserManager<WordleUser> _userManager = userManager;
+        private readonly WordleDbContext _context = context;
+        private readonly IConfiguration configuration = configuration;
 
         [HttpPost("register")]
         public async Task<IActionResult> Register(RegisterDto dto) {
@@ -57,8 +55,19 @@ namespace Server.Controllers {
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
 
+            var wordleUser = await _context.Users.Include(u => u.Settings).Where(u => u.Id == user.Id).FirstAsync();
+            var settings = wordleUser.Settings;
             var token = tokenHandler.CreateToken(tokenDescriptor);
-            return Ok(new { Token = tokenHandler.WriteToken(token) });
+
+            return Ok(new LoginResponseDto {
+                Token = tokenHandler.WriteToken(token),
+                Settings = new() {
+                    ShowHints = settings.ShowHints,
+                    DarkMode = settings.DarkMode,
+                    HardMode = settings.HardMode,
+                    HighContrastMode = settings.HighContrastMode
+                }
+            });
         }
     }
 }

@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -44,6 +44,7 @@ builder.Services.AddAuthentication(options => {
 
 builder.Services.AddScoped<IDailyChallengeService, DailyChallengeService>();
 builder.Services.AddScoped<IWordleGameService, WordleGameService>();
+builder.Services.AddScoped<IWordleSettingsService, WordleSettingsService>();
 
 
 var app = builder.Build();

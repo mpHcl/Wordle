@@ -1,32 +1,22 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Server.Exceptions;
 using Server.Services;
-using Shared.Dtos;
 using System.Security.Claims;
-using System.Threading.Tasks;
 
 namespace Server.Controllers {
     [ApiController]
     [Route("/api/[controller]")]
-    public class GameController : ControllerBase {
-        private readonly IDailyChallengeService _dailyChallengeService;
-        private readonly IWordleGameService _wordleGameService;
-
-        public GameController(IDailyChallengeService dailyChallengeService, IWordleGameService wordleGameService) {
-            _dailyChallengeService = dailyChallengeService;
-            _wordleGameService = wordleGameService;
-        }
+    public class GameController(IDailyChallengeService dailyChallengeService, IWordleGameService wordleGameService) : ControllerBase {
+        private readonly IDailyChallengeService _dailyChallengeService = dailyChallengeService;
+        private readonly IWordleGameService _wordleGameService = wordleGameService;
 
         [Authorize]
         [HttpGet("daily_challenge")]
         public async Task<IActionResult> GetDailyChallenge() {
             var todaysChallange = await _dailyChallengeService.GetToday();
 
-            if (todaysChallange is null) {
-                todaysChallange = await _dailyChallengeService.CreateToday();
-            }
+            todaysChallange ??= await _dailyChallengeService.CreateToday();
 
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value!;
 

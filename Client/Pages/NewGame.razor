@@ -2,6 +2,7 @@
 @using System.Security.Cryptography
 @using Client.Pages.Components.Wordle
 @using Shared
+@using Shared.Dtos
 
 @inject HttpClient Http
 @inject ILocalStorageService LocalStorage
@@ -62,7 +63,7 @@
             Game = await Http.GetFromJsonAsync<GameDto>("/api/game/new_game");
         }
         catch (Exception ex) {
-
+            Console.WriteLine(ex.Message);
         }
     }
 }
