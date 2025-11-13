@@ -25,6 +25,9 @@ namespace Shared.Dtos {
         public int Id { get; set; }
         public GameStatus GameStaus { get; set; }
         public List<AttemptDto> Attempts { get; set; } = [];
+
+        public required bool HardMode { get; set; }
+        public required bool Hints { get; set; }
         public string? Word { get; set; }
         public string? Category { get; set; }
     }

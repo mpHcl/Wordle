@@ -12,7 +12,7 @@
 }
 
     .cell.empty {
-        background: white;
+        background: var(--bg-color);
     }
 
     .cell.absent {

@@ -1,7 +1,11 @@
 ﻿@page "/settings"
+
 @using Shared.Dtos
+
 @inject HttpClient Http
 @inject ILocalStorageService LocalStorage
+@inject NavigationManager Navigation
+
 
 <h3>Settings</h3>
 
@@ -60,6 +64,11 @@ else {
             var response = await Http.PostAsJsonAsync("api/settings", settings);
             if (response.IsSuccessStatusCode) {
                 message = "Settings saved successfully.";
+                await LocalStorage.SetItemAsync("darkMode", settings?.DarkMode);
+                await LocalStorage.SetItemAsync("hardMode", settings?.HardMode);
+                await LocalStorage.SetItemAsync("highContrastMode", settings?.HighContrastMode);
+                await LocalStorage.SetItemAsync("hints", settings?.ShowHints);
+                Navigation.NavigateTo("/settings", forceLoad: true);
             }
             else {
                 message = $"Failed to save settings: {response.StatusCode}";

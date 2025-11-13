@@ -1,7 +1,7 @@
 ﻿@page "/login"
 @using Shared.Dtos.Auth
 @inject HttpClient Http
-@inject ILocalStorageService LocatStorage
+@inject ILocalStorageService LocalStorage
 @inject NavigationManager Navigation
 @inject AuthenticationStateProvider AuthStateProvider
 
@@ -88,11 +88,11 @@
 
             var token = responseDto.Token;
 
-            await LocatStorage.SetItemAsync("authToken", token);
-            await LocatStorage.SetItemAsync("darkMode", responseDto.Settings.DarkMode);
-            await LocatStorage.SetItemAsync("hardMode", responseDto.Settings.HardMode);
-            await LocatStorage.SetItemAsync("highContrastMode", responseDto.Settings.HighContrastMode);
-            await LocatStorage.SetItemAsync("hints", responseDto.Settings.ShowHints);
+            await LocalStorage.SetItemAsync("authToken", token);
+            await LocalStorage.SetItemAsync("darkMode", responseDto.Settings.DarkMode);
+            await LocalStorage.SetItemAsync("hardMode", responseDto.Settings.HardMode);
+            await LocalStorage.SetItemAsync("highContrastMode", responseDto.Settings.HighContrastMode);
+            await LocalStorage.SetItemAsync("hints", responseDto.Settings.ShowHints);
 
             ((Client.Auth.JwtAuthenticationStateProvider)AuthStateProvider).NotifyUserAuthentication(token);
             Http.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("bearer", token);

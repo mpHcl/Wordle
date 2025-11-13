@@ -4,28 +4,12 @@
 @inject NavigationManager Navigation
 
 @if (!hideLayout) {
-    <div class="page">
+    <div class="page @(isDarkTheme ? "dark-theme" : "light-theme")">
         <div class="sidebar">
             <NavMenu />
         </div>
 
         <main>
-            @if (authState is null) {
-                <p>Loading...</p>
-            }
-            else if (authState.User.Identity?.IsAuthenticated ?? false) {
-                <div class="top-row px-4">
-                    <a href="logout">Log out</a>
-                </div>
-            }
-            else {
-                <div class="top-row px-4">
-                    <a href="/login">Log in</a>
-                    <a href="/register">Register</a>
-                </div>
-            }
-
-
             <article class="content px-4">
                 @Body
             </article>
@@ -39,16 +23,25 @@ else {
 @code {
     private AuthenticationState? authState;
     private bool hideLayout;
+    private bool isDarkTheme = false;
 
 
     protected override async Task OnInitializedAsync() {
         if (!await LocalStorage.ContainKeyAsync("authToken"))
         {
-             Navigation.NavigateTo("/login");
+            Navigation.NavigateTo("/login");
         }
         authState = await AuthProvider.GetAuthenticationStateAsync();
         UpdateLayoutVisibility();
         Navigation.LocationChanged += (_, __) => UpdateLayoutVisibility();
+
+        if (await LocalStorage.ContainKeyAsync("darkMode")) {
+            isDarkTheme = await LocalStorage.GetItemAsync<bool>("darkMode");
+        }
+        else {
+            // default: light
+            await LocalStorage.SetItemAsync<bool>("darkMode", false);
+        }
     }
 
     private void UpdateLayoutVisibility() {

@@ -10,14 +10,14 @@ namespace Server.Models {
 
         public int? DailyChallangeId { get; set; }
         public DailyChallenge? DailyChallenge { get; set; }
-
-
+        public required bool HardMode { get; set; }
+        public required bool Hints { get; set; }
         public bool IsWon { get; set; } = false;
 
-        public ICollection<GameAttempt> Attempts { get; set; } = new List<GameAttempt>();
+        public ICollection<GameAttempt> Attempts { get; set; } = [];
 
         [NotMapped]
-        public int NumebrOfAttempts => Attempts.Count();
+        public int NumebrOfAttempts => Attempts.Count;
         [NotMapped]
         public bool IsDailyChallenge => DailyChallangeId is not null;
     }

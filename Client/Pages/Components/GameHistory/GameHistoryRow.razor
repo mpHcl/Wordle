@@ -8,12 +8,15 @@
             <span>@GameHistoryItem.Word</span>
         }
         else {
-            <span class="text-gray-500 italic">Unfinished</span>
+            <span class="text-gray-500 italic">-</span>
         }
     </td>
     <td class="border border-gray-300 px-4 py-2">@GameHistoryItem.Attempts.Count</td>
     <td class="border border-gray-300 px-4 py-2">
-        @* @GameHistoryItem.Date.ToString("MMM dd, yyyy", CultureInfo.InvariantCulture) *@
+        @GameHistoryItem.HardMode.ToString(CultureInfo.InvariantCulture)
+    </td>
+    <td class="border border-gray-300 px-4 py-2">
+        @GameHistoryItem.Hints.ToString(CultureInfo.InvariantCulture)
     </td>
     <td class="border border-gray-300 px-4 py-2">@GameHistoryItem.GameStaus</td>
     <td class="border border-gray-300 px-4 py-2"><a href="/game/@GameHistoryItem.Id">Open</a></td>

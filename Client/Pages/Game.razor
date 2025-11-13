@@ -16,9 +16,9 @@
             <h1>New game</h1>
             <p class="sub">
                 Guess the 5-letter word. You have <strong>6</strong> tries.
-                @* @if (Game.Category != "NoHintsMode") {
-                    <span> Category: <strong>@Game.Category</strong></span>
-                } *@
+                @if (GameItem.Category is not null) {
+                    <span> Category: <strong>@GameItem.Category</strong></span>
+                }
             </p>
         </header>
 
