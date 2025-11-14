@@ -4,14 +4,10 @@ using Server.Models;
 using Shared.Dtos;
 
 namespace Server.Services {
-    public class DailyChallengeService : IDailyChallengeService {
-        private readonly WordleDbContext _context;
+    public class DailyChallengeService(WordleDbContext context) : IDailyChallengeService {
+        private readonly WordleDbContext _context = context;
         private static readonly Random _random = new();
 
-
-        public DailyChallengeService(WordleDbContext context) {
-            _context = context;
-        }
         public async Task<DailyChallengeDto> CreateToday() {
             var today = DateTime.UtcNow.Date;
 

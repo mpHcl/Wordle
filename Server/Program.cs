@@ -45,6 +45,7 @@ builder.Services.AddAuthentication(options => {
 builder.Services.AddScoped<IDailyChallengeService, DailyChallengeService>();
 builder.Services.AddScoped<IWordleGameService, WordleGameService>();
 builder.Services.AddScoped<IWordleSettingsService, WordleSettingsService>();
+builder.Services.AddScoped<IAchievementService, AchievementService>();
 
 
 var app = builder.Build();

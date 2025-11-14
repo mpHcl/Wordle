@@ -33,6 +33,14 @@
                     Name = "Category Master",
                     Description = "Solve 5 Wordles from each category.",
                 },
+                new () {
+                    Name = "No hints",
+                    Description = "Solve wordle game without hints.",
+                },
+                new () {
+                    Name = "Hard mode!",
+                    Description = "Solve wordle hard mode game.",
+                },
             };
             dbContext.Achievements.AddRange(defaultAchievements);
             dbContext.SaveChanges();

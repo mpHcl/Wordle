@@ -6,8 +6,9 @@ using Shared.Dtos;
 using System;
 
 namespace Server.Services {
-    public class WordleGameService(WordleDbContext context) : IWordleGameService {
+    public class WordleGameService(WordleDbContext context, IAchievementService achievementService) : IWordleGameService {
         private readonly WordleDbContext _context = context;
+        private readonly IAchievementService _achievementService = achievementService;
         private static readonly Random _random = new();
 
         private static List<State> CalculateLetterState(GameAttempt attempt, bool hardMode) {
@@ -162,6 +163,7 @@ namespace Server.Services {
 
             if (game.Word?.Text.ToUpper() == attempt) {
                 game.IsWon = true;
+                await _achievementService.UpdateAchievements(userId);
             }
 
             await _context.SaveChangesAsync();
