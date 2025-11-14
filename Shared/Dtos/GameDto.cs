@@ -30,5 +30,6 @@ namespace Shared.Dtos {
         public required bool Hints { get; set; }
         public string? Word { get; set; }
         public string? Category { get; set; }
-    }
+        public List<AchievementDto>? NewAchievements { get; set; }
+     }
 }

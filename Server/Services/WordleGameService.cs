@@ -163,11 +163,11 @@ namespace Server.Services {
 
             if (game.Word?.Text.ToUpper() == attempt) {
                 game.IsWon = true;
-                await _achievementService.UpdateAchievements(userId);
             }
 
             await _context.SaveChangesAsync();
 
+            var newAchievements = await _achievementService.UpdateAchievements(userId);
             gameStatus = CalculateStatus(game);
             return new GameDto() {
                 Id = game.Id,
@@ -179,7 +179,8 @@ namespace Server.Services {
                 HardMode = game.HardMode,
                 Hints = game.Hints,
                 Word = gameStatus != GameStatus.InProgress ? game.Word?.Text : null,
-                Category = game.Hints ? game.Word?.Category.Name : null
+                Category = game.Hints ? game.Word?.Category.Name : null,
+                NewAchievements = [.. newAchievements]
             };
         }
 

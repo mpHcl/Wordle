@@ -6,27 +6,27 @@ using Server.Models;
 using Shared.Dtos;
 
 namespace Server.Services {
-    public class AchievementService(UserManager<WordleUser> userManager, WordleDbContext context) 
+    public class AchievementService(UserManager<WordleUser> userManager, WordleDbContext context)
             : IAchievementService {
 
         private readonly WordleDbContext _context = context;
         private readonly UserManager<WordleUser> _userManager = userManager;
-        
+
         public async Task<AchievementDto> GetAchievementDetails(int achievementId) {
-            var achievement = await _context.Achievements.FindAsync(achievementId) 
+            var achievement = await _context.Achievements.FindAsync(achievementId)
                 ?? throw new Exception("Not found");
             var num_of_achievements = await _context.UserAchievements
                                                         .Where(a => a.AchievementId == achievementId)
                                                         .CountAsync();
 
             var num_of_users = await _userManager.Users.CountAsync();
-            var percent = 100.0 * (double) num_of_achievements / (double) num_of_users;
+            var percent = 100.0 * (double)num_of_achievements / (double)num_of_users;
 
             return new AchievementDto {
                 Id = achievementId,
                 Name = achievement.Name,
                 Description = achievement.Description,
-                PercentOfUsers = percent 
+                PercentOfUsers = percent
             };
         }
 
@@ -54,8 +54,8 @@ namespace Server.Services {
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<AchievementDto>> UpdateAchievements(string userId) {
-            var achievementsToCheck = await _context.Achievements.Where(a => 
+        public async Task<ICollection<AchievementDto>> UpdateAchievements(string userId) {
+            var achievementsToCheck = await _context.Achievements.Where(a =>
                 !_context.UserAchievements
                     .Where(ua => ua.UserId == userId)
                     .Select(ua => ua.AchievementId)
@@ -63,43 +63,118 @@ namespace Server.Services {
             )
             .AsNoTracking()
             .ToListAsync();
-            
+
             var newAchievements = new List<AchievementDto>();
             foreach (var achievement in achievementsToCheck) {
                 switch (achievement.Name) {
-                    case "First Solve!": CheckFirstSolveAchievement(newAchievements, userId); break;
-                    case "First Try!": await CheckFirstTryAchievement(newAchievements, userId); break;
-                    case "Persistent Player": CheckPersistentPlayerAchievement(newAchievements, userId); break;
-                    case "Category Master": CheckCategoryMasterAchievement(newAchievements, userId); break;
-                    case "No hints": CheckNoHintsAchievement(newAchievements, userId); break;
-                    case "Hard mode!": CheckHardModeAchievement(newAchievements, userId); break;
+                    case "First Solve!": await CheckFirstSolveAchievement(userId, newAchievements); break;
+                    case "First Try!": await CheckFirstTryAchievement(userId, newAchievements); break;
+                    case "Persistent Player": await CheckPersistentPlayerAchievement(userId, newAchievements); break;
+                    case "Category Master": await CheckCategoryMasterAchievement(userId, newAchievements); break;
+                    case "No hints": await CheckNoHintsAchievement(userId, newAchievements); break;
+                    case "Hard mode!": await CheckHardModeAchievement(userId, newAchievements); break;
                 }
             }
 
             return newAchievements;
         }
 
-        private void CheckHardModeAchievement(List<AchievementDto> newAchievements, string userId) {
-            throw new NotImplementedException();
+        private async Task CheckHardModeAchievement(string userId, List<AchievementDto> newAchievements) {
+            var game = await _context.Games
+                .Include(g => g.Attempts)
+                .Where(g => g.UserId == userId && g.IsWon && g.HardMode)
+                .AnyAsync();
+
+            if (!game) {
+                return;
+            }
+
+            var achievement = new UserAchievements { UserId = userId, AchievementId = 6, DateAchieved = DateTime.UtcNow.Date };
+
+            await _context.AddAsync(achievement);
+            await _context.SaveChangesAsync();
+
+            var achievementDto = await GetAchievementDetails(6);
+            newAchievements.Add(achievementDto);
         }
 
-        private void CheckNoHintsAchievement(List<AchievementDto> newAchievements, string userId) {
-            throw new NotImplementedException();
+        private async Task CheckNoHintsAchievement(string userId, List<AchievementDto> newAchievements) {
+            var game = await _context.Games
+                .Include(g => g.Attempts)
+                .Where(g => g.UserId == userId && g.IsWon && !g.Hints)
+                .AnyAsync();
+
+            if (!game) {
+                return;
+            }
+
+            var achievement = new UserAchievements { UserId = userId, AchievementId = 5, DateAchieved = DateTime.UtcNow.Date };
+
+            await _context.AddAsync(achievement);
+            await _context.SaveChangesAsync();
+
+            var achievementDto = await GetAchievementDetails(5);
+            newAchievements.Add(achievementDto);
         }
 
-        private void CheckCategoryMasterAchievement(List<AchievementDto> newAchievements, string userId) {
-            throw new NotImplementedException();
+        private async Task CheckCategoryMasterAchievement(string userId, List<AchievementDto> newAchievements) {
+            var count = await _context.Games
+                .Where(g => g.UserId == userId && g.IsWon)
+                .Include(g => g.Word)
+                .GroupBy(g => g.Word!.CategoryId)
+                .Where(g => g.Count() >= 5)
+                .CountAsync();
+
+            var numOfCategories = await _context.WordCategories.CountAsync();
+
+            if (count != numOfCategories) {
+                return;
+            }
+
+            var achievement = new UserAchievements { UserId = userId, AchievementId = 4, DateAchieved = DateTime.UtcNow.Date };
+
+            await _context.AddAsync(achievement);
+            await _context.SaveChangesAsync();
+
+            var achievementDto = await GetAchievementDetails(4);
+            newAchievements.Add(achievementDto);
         }
 
-        private void CheckPersistentPlayerAchievement(List<AchievementDto> newAchievements, string userId) {
-            throw new NotImplementedException();
+        private async Task CheckPersistentPlayerAchievement(string userId, List<AchievementDto> newAchievements) {
+            var dates = await _context.GameAttempts
+                .Include(a => a.Game)
+                .Where(a => a.Game!.UserId == userId)
+                .Select(a => a.AttemptedAt.Date)
+                .Distinct()
+                .OrderBy(d => d)
+                .ToListAsync();
+
+            var has7DayStreak = dates
+                .Select((date, index) => new { date, index })
+                .GroupBy(x => x.date.AddDays(-x.index))
+                .Any(g => g.Count() >= 7);
+
+
+            if (!has7DayStreak) {
+                return;
+            }
+
+            var achievement = new UserAchievements { UserId = userId, AchievementId = 3, DateAchieved = DateTime.UtcNow.Date };
+
+            await _context.AddAsync(achievement);
+            await _context.SaveChangesAsync();
+
+            var achievementDto = await GetAchievementDetails(3);
+            newAchievements.Add(achievementDto);
         }
 
-        private async Task CheckFirstTryAchievement(List<AchievementDto> newAchievements, string userId) {
-            var game = await _context.Games.Where(g => g.UserId == userId && g.IsWon && g.NumebrOfAttempts == 1)
-                .FirstOrDefaultAsync();
+        private async Task CheckFirstTryAchievement(string userId, List<AchievementDto> newAchievements) {
+            var game = await _context.Games
+                .Include(g => g.Attempts)
+                .Where(g => g.UserId == userId && g.IsWon && g.Attempts.Count == 1)
+                .AnyAsync();
 
-            if (game is null) {
+            if (!game) {
                 return;
             }
 
@@ -112,8 +187,23 @@ namespace Server.Services {
             newAchievements.Add(achievementDto);
         }
 
-        private void CheckFirstSolveAchievement(List<AchievementDto> newAchievements, string userId) {
-            throw new NotImplementedException();
+        private async Task CheckFirstSolveAchievement(string userId, List<AchievementDto> newAchievements) {
+            var game = await _context.Games
+                .Include(g => g.Attempts)
+                .Where(g => g.UserId == userId && g.IsWon)
+                .AnyAsync();
+
+            if (!game) {
+                return;
+            }
+
+            var achievement = new UserAchievements { UserId = userId, AchievementId = 1, DateAchieved = DateTime.UtcNow.Date };
+
+            await _context.AddAsync(achievement);
+            await _context.SaveChangesAsync();
+
+            var achievementDto = await GetAchievementDetails(1);
+            newAchievements.Add(achievementDto);
         }
     }
 }
