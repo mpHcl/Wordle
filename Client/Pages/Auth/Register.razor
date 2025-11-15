@@ -81,6 +81,11 @@
 
         <button class="btn btn-primary" @onclick="RegisterUser">Sign Up</button>
 
+        @foreach(var msg in messages)
+        {
+            <div style="color:red; margin-top:10px;">@msg</div>
+        }
+
         <p class="small-text mt-3">
             Already have an account? <a href="/login">Log in</a>
         </p>
@@ -91,7 +96,7 @@
     private string username;
     private string email;
     private string password;
-
+    private List<string> messages = [];
 
     private async Task RegisterUser() {
         var response = await Http.PostAsJsonAsync("/api/auth/register",
@@ -101,7 +106,17 @@
             Navigation.NavigateTo("/login");
         }
         else {
-            // TO DO
+            Console.WriteLine("HERE WE GO");
+            var responseContent = await response.Content.ReadFromJsonAsync<JsonElement>();
+
+            messages = new();
+
+            Console.WriteLine(responseContent);
+
+            foreach (var error in responseContent.EnumerateArray()) {
+                var description = error.GetProperty("description").GetString();
+                messages.Add($"{description}");
+            }
         }
     }
 }

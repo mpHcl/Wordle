@@ -1,5 +1,6 @@
 ﻿@page "/login"
 @using Shared.Dtos.Auth
+@using System.Text.Json
 @inject HttpClient Http
 @inject ILocalStorageService LocalStorage
 @inject NavigationManager Navigation
@@ -15,6 +16,10 @@
 
         <button class="btn btn-primary" @onclick="LoginUser">Log In</button>
 
+        @if (message is not null)
+        {
+            <span style="color:red;">@message</span>
+        }
         <p class="small-text mt-3">
             Don’t have an account? <a href="/register">Sign up</a>
         </p>
@@ -79,7 +84,7 @@
 @code {
     private string email;
     private string password;
-
+    private string? message;
 
     private async Task LoginUser() {
         var response = await Http.PostAsJsonAsync("/api/auth/login", new { Email = email, Password = password });
@@ -98,6 +103,12 @@
             Http.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("bearer", token);
 
             Navigation.NavigateTo("/", forceLoad: true);
+        }
+        else
+        {
+            var responseContent =  await response.Content.ReadFromJsonAsync<JsonElement>();
+            message = responseContent.GetProperty("message").GetString() ?? "An error occurred";
+
         }
     }
 }
