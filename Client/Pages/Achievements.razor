@@ -1,0 +1,40 @@
+﻿@page "/achievements"
+
+@using Shared.Dtos
+@using Client.Pages.Components.Achievements
+
+@inject HttpClient Http
+@inject ILocalStorageService LocalStorage
+
+<PageTitle>Achievements</PageTitle>
+
+<h1 class="text-2xl font-bold mb-4">Achievements</h1>
+
+@if (achievements != null) {
+    <AchievementList Achievements=achievements />
+}
+else {
+    <p>Loading</p>
+}
+
+@code {
+    private List<AchievementDto>? achievements;
+
+    protected override async Task OnInitializedAsync() {
+        achievements = await FetchAchievementsAsync();
+    }
+
+    private async Task<List<AchievementDto>?> FetchAchievementsAsync()
+    {
+        try {
+            var token = await LocalStorage.GetItemAsync<string>("authToken");
+            Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            return await Http.GetFromJsonAsync<List<AchievementDto>>("/api/achievements/achievements");
+        }
+        catch (Exception ex) {
+            Console.WriteLine(ex.Message);
+            return null;
+        }
+    }
+}

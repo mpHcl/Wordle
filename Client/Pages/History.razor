@@ -13,6 +13,21 @@
 <h1 class="text-2xl font-bold mb-4">Game History</h1>
 @if (gamesHistory != null) {
     <GameHistory GamesHistory=gamesHistory />
+    <div class="history-pagination">
+        <button @onclick="LoadPreviousPage"
+                disabled="@(!HasPreviousPage)"
+                class="pager-btn">
+            ‹ Previous
+        </button>
+
+        <button @onclick="LoadNextPage"
+                disabled="@(!HasNextPage)"
+                class="pager-btn">
+            Next ›
+        </button>
+    </div>
+    
+
 }
 else {
     <p>Loading</p>
@@ -20,20 +35,51 @@ else {
 
 @code {
     private IEnumerable<GameDto>? gamesHistory;
+    private int page = 1;
 
-    protected override async Task OnInitializedAsync() {
-        await GetHistory();
+    private bool HasNextPage = true;
+    private bool HasPreviousPage => page > 1;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadPage();
     }
 
-    async Task GetHistory() {
-        try {
+    private async Task LoadPage()
+    {
+        try
+        {
             var token = await LocalStorage.GetItemAsync<string>("authToken");
-            Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            Http.DefaultRequestHeaders.Authorization =
+                new AuthenticationHeaderValue("Bearer", token);
 
-            gamesHistory = await Http.GetFromJsonAsync<IEnumerable<GameDto>>("/api/game/games");
+            var result = await Http.GetFromJsonAsync<IEnumerable<GameDto>>(
+                $"/api/game/games?page={page}&pageSize=18"
+            );
+
+            gamesHistory = result;
+
+            HasNextPage = result?.Count() == 18;
         }
-        catch (Exception ex) {
+        catch (Exception ex)
+        {
             Console.WriteLine(ex.Message);
         }
+    }
+
+    private async Task LoadNextPage()
+    {
+        if (!HasNextPage) return;
+
+        page++;
+        await LoadPage();
+    }
+
+    private async Task LoadPreviousPage()
+    {
+        if (page <= 1) return;
+
+        page--;
+        await LoadPage();
     }
  }

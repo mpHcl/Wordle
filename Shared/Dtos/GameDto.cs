@@ -23,7 +23,7 @@ namespace Shared.Dtos {
     }
     public class GameDto {
         public int Id { get; set; }
-        public GameStatus GameStaus { get; set; }
+        public GameStatus GameStatus { get; set; }
         public List<AttemptDto> Attempts { get; set; } = [];
 
         public required bool HardMode { get; set; }

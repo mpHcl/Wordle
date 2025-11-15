@@ -2,26 +2,39 @@
 @using Shared
 @using Shared.Dtos
 
+
 <tr class="hover:bg-gray-50">
     <td class="border border-gray-300 px-4 py-2">
-        @if (GameHistoryItem.Word is not null) {
+        @if (!string.IsNullOrEmpty(GameHistoryItem.Word)) {
             <span>@GameHistoryItem.Word</span>
         }
         else {
             <span class="text-gray-500 italic">-</span>
         }
     </td>
-    <td class="border border-gray-300 px-4 py-2">@GameHistoryItem.Attempts.Count</td>
+
+    <td class="border border-gray-300 px-4 py-2">
+        @GameHistoryItem.Attempts?.Count
+    </td>
+
     <td class="border border-gray-300 px-4 py-2">
         @GameHistoryItem.HardMode.ToString(CultureInfo.InvariantCulture)
     </td>
+
     <td class="border border-gray-300 px-4 py-2">
         @GameHistoryItem.Hints.ToString(CultureInfo.InvariantCulture)
     </td>
-    <td class="border border-gray-300 px-4 py-2">@GameHistoryItem.GameStaus</td>
-    <td class="border border-gray-300 px-4 py-2"><a href="/game/@GameHistoryItem.Id">Open</a></td>
+
+    <td class="border border-gray-300 px-4 py-2">
+        @GameHistoryItem.GameStatus
+    </td>
+
+    <td class="border border-gray-300 px-4 py-2">
+        <a class="text-blue-600 hover:underline" href="/game/@GameHistoryItem.Id">Open</a>
+    </td>
 </tr>
 
 @code {
-    [Parameter] public GameDto GameHistoryItem { get; set; } = default!;
+    [Parameter]
+    public GameDto GameHistoryItem { get; set; } = default!;
 }

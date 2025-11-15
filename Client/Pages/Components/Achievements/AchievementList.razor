@@ -1,0 +1,46 @@
+﻿@using Shared.Dtos
+@using Client.Pages.Components.Achievements
+
+@inject HttpClient Http
+@inject ILocalStorageService LocalStorage
+
+
+<ul class="achievement-list">
+    @if (Achievements != null) {
+        @foreach (var a in Achievements) {
+            <li class="achievement-item" @onclick="() => OpenModal(a.Id)">
+                <div class="achievement-name">@a.Name</div>
+                <div class="achievement-meta">
+                    @if (a.Achieved ?? false) {
+                        <span class="achieved-badge">✓ Achieved</span>
+                    }
+                </div>
+            </li>
+        }
+    }
+</ul>
+
+<AchievementDetails Selected=@selected />
+
+
+
+@code {
+    [Parameter]
+    public List<AchievementDto>? Achievements { get; set; }
+    AchievementDto? selected;
+
+
+    async Task OpenModal(int id) {
+        try {
+            selected = await Http.GetFromJsonAsync<AchievementDto>($"/api/achievements/achievement/{id}");
+        }
+        catch (Exception ex) {
+            Console.WriteLine(ex.Message);
+        }
+
+        StateHasChanged();
+    }
+
+
+    void CloseModal() => selected = null;
+}

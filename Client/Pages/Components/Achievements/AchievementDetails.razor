@@ -1,0 +1,36 @@
+﻿@using Shared.Dtos
+
+@if (Selected is not null) {
+    <div class="modal-overlay" @onclick="HandleClose">
+        <div class="modal-window" @onclick:stopPropagation>
+            <h3 class="modal-title">@Selected.Name</h3>
+            <p class="modal-text">@Selected.Description</p>
+
+            <p class="modal-text">
+                <strong>Status:</strong> @(Selected.Achieved ?? false ? "Achieved" : "Not achieved")
+            </p>
+
+            <p class="modal-text">
+                <strong>Percent:</strong> @Selected.PercentOfUsers%
+            </p>
+
+
+            <button class="modal-button" @onclick="HandleClose">Close</button>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public AchievementDto? Selected { get; set; }
+    [Parameter]
+    public EventCallback OnClose { get; set; }
+
+    private async Task HandleClose()
+    {
+        await OnClose.InvokeAsync();
+        Selected = null;
+    }
+
+
+}

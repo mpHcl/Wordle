@@ -4,29 +4,29 @@
 @using Shared.Dtos
 
 @if (GamesHistory?.Count() == 0) {
-    <p>No games played yet.</p>
+    <p class="no-games-text">No games played yet.</p>
 }
 else {
-    <table class="table-auto w-full border-collapse border border-gray-300" style="margin: auto">
-        <thead class="bg-gray-100">
-            <tr>
-                <th class="border border-gray-300 px-4 py-2 text-center">Game</th>
-                <th class="border border-gray-300 px-4 py-2 text-center">Tries</th>
-                <th class="border border-gray-300 px-4 py-2 text-center">Hard mode</th>
-                <th class="border border-gray-300 px-4 py-2 text-center">Hints</th>
-                <th class="border border-gray-300 px-4 py-2 text-center">Status</th>
-                <th class="border border-gray-300 px-4 py-2 text-center">Link</th>
-            </tr>
-        </thead>
-        <tbody>
-            @if (GamesHistory is not null)
-            {
-                @foreach (var gameHistoryEntry in GamesHistory) {
-                    <GameHistoryRow GameHistoryItem=gameHistoryEntry />
+    <div class="game-history-container">
+        <table class="game-history-table">
+            <thead>
+                <tr>
+                    <th>Game</th>
+                    <th>Tries</th>
+                    <th>Hard mode</th>
+                    <th>Hints</th>
+                    <th>Status</th>
+                    <th>Link</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @foreach (var entry in GamesHistory!) {
+                    <GameHistoryRow GameHistoryItem="entry" />
                 }
-            }
-        </tbody>
-    </table>
+            </tbody>
+        </table>
+    </div>
 }
 
 @code {

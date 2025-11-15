@@ -69,6 +69,10 @@ else {
             var response = await Http.PostAsJsonAsync($"/api/game/{GameDto?.Id}/attempt", Current);
             if (response.IsSuccessStatusCode) {
                 GameDto = await response.Content.ReadFromJsonAsync<GameDto>();
+                if (GameDto?.NewAchievements?.Count > 0)
+                {
+                    // TODO 
+                }
             }
         }
         catch (Exception ex) {

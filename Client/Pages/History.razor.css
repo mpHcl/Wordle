@@ -1,0 +1,30 @@
+﻿.history-pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 1.5rem;
+    gap: 1rem;
+}
+
+.pager-btn {
+    padding: 0.6rem 1.2rem;
+    border: 1px solid #d6d5d5;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color .15s ease, color .15s ease;
+}
+
+    .pager-btn:hover:not(:disabled) {
+        background-color: #e8e8e8;
+    }
+
+.dark-theme .pager-btn:hover:not(:disabled) {
+    background-color: #333333;
+}
+
+.pager-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}

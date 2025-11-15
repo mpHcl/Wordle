@@ -54,7 +54,7 @@ namespace Server.Services {
             var gameStatus = CalculateStatus(game);
             var result = new GameDto() {
                 Id = game.Id,
-                GameStaus = gameStatus,
+                GameStatus = gameStatus,
                 Attempts = [.. game.Attempts.Select(a => new AttemptDto {
                     Attempt = a.AttemptedWord,
                     LettersState = CalculateLetterState(a, game.HardMode)
@@ -85,7 +85,7 @@ namespace Server.Services {
 
             var gameDto = new GameDto {
                 Id = game.Id,
-                GameStaus = CalculateStatus(game),
+                GameStatus = CalculateStatus(game),
                 Attempts = [],
                 HardMode = game.HardMode, 
                 Hints = game.Hints
@@ -116,7 +116,7 @@ namespace Server.Services {
 
             var gameDto = new GameDto {
                 Id = game.Id,
-                GameStaus = CalculateStatus(game),
+                GameStatus = CalculateStatus(game),
                 Attempts = [],
                 HardMode = game.HardMode,
                 Hints = game.Hints, 
@@ -175,7 +175,7 @@ namespace Server.Services {
                     Attempt = a.AttemptedWord,
                     LettersState = CalculateLetterState(a, game.HardMode)
                 })],
-                GameStaus = gameStatus,
+                GameStatus = gameStatus,
                 HardMode = game.HardMode,
                 Hints = game.Hints,
                 Word = gameStatus != GameStatus.InProgress ? game.Word?.Text : null,
@@ -198,7 +198,7 @@ namespace Server.Services {
 
             var gameDtos = games.Select(g => new GameDto {
                 Id = g.Id,
-                GameStaus = CalculateStatus(g),
+                GameStatus = CalculateStatus(g),
                 Attempts = [.. g.Attempts.Select(a => new AttemptDto {
                     Attempt = a.AttemptedWord,
                     LettersState = CalculateLetterState(a, g.HardMode)
@@ -222,7 +222,7 @@ namespace Server.Services {
 
             var result = new GameDto {
                 Id = game.Id,
-                GameStaus = CalculateStatus(game),
+                GameStatus = CalculateStatus(game),
                 Attempts = [.. game.Attempts.Select(a => new AttemptDto {
                     Attempt = a.AttemptedWord,
                     LettersState = CalculateLetterState(a, game.HardMode)
