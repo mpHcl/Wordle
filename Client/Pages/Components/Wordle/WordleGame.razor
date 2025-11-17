@@ -17,6 +17,7 @@ else {
         <WordleInput @bind-CurrentGuess="Current" HandleKeyDown=@HandleKeyDown SubmitGuess=@SubmitGuess />
         <WordleKeyboard KeyStates="@KeyStates" OnKeyPress="@HandleKeyPress" />
         <WordleStatus Message="@Message" />
+        <WordleNewAchievements Achievements=@GameDto?.NewAchievements />
     </section>
 }
 
@@ -71,7 +72,7 @@ else {
                 GameDto = await response.Content.ReadFromJsonAsync<GameDto>();
                 if (GameDto?.NewAchievements?.Count > 0)
                 {
-                    // TODO 
+                    Console.WriteLine("Test");
                 }
             }
         }

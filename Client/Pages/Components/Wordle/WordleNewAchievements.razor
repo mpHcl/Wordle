@@ -1,0 +1,24 @@
+@using System.Security.Cryptography
+@using Client.Pages.Components.Wordle
+@using Shared
+@using Shared.Dtos
+
+@if (Achievements?.Count > 0) {
+    <div class="achievements">
+        <h3>
+            New Achievements Unlocked!
+
+    </h3>
+        <ul>
+            @foreach (var achievement in Achievements) {
+                <li>@achievement.Name</li>
+            }
+        </ul>
+    </div>
+    <a href="/achievements">(Check achievements page)</a>
+}
+
+@code {
+    [Parameter]
+    public List<AchievementDto>? Achievements { get; set; }
+}
