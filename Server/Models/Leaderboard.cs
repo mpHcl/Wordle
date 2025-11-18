@@ -7,5 +7,6 @@
         public int GamesWon { get; set; } = 0;
         public double WinPercentage { get; set; } = 0.0;
         public double AverageGuesses { get; set; } = 0.0;
+        public int Points { get; set; } = 0;
     }
 }

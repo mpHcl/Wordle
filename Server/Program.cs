@@ -46,6 +46,7 @@ builder.Services.AddScoped<IDailyChallengeService, DailyChallengeService>();
 builder.Services.AddScoped<IWordleGameService, WordleGameService>();
 builder.Services.AddScoped<IWordleSettingsService, WordleSettingsService>();
 builder.Services.AddScoped<IAchievementService, AchievementService>();
+builder.Services.AddScoped<ILeaderboardService, LeaderboardService>();
 
 
 var app = builder.Build();

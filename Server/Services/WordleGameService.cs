@@ -6,9 +6,15 @@ using Shared.Dtos;
 using System;
 
 namespace Server.Services {
-    public class WordleGameService(WordleDbContext context, IAchievementService achievementService) : IWordleGameService {
+    public class WordleGameService(
+        WordleDbContext context,
+        IAchievementService achievementService,
+        ILeaderboardService leaderboardService
+    ) : IWordleGameService {
+
         private readonly WordleDbContext _context = context;
         private readonly IAchievementService _achievementService = achievementService;
+        private readonly ILeaderboardService _lederboardService = leaderboardService;
         private static readonly Random _random = new();
 
         private static List<State> CalculateLetterState(GameAttempt attempt, bool hardMode) {
@@ -76,7 +82,7 @@ namespace Server.Services {
                 DailyChallenge = dailyChallenge,
                 DailyChallangeId = challengeId,
                 WordId = dailyChallenge.WordId,
-                HardMode = false, 
+                HardMode = false,
                 Hints = false
             };
 
@@ -87,7 +93,7 @@ namespace Server.Services {
                 Id = game.Id,
                 GameStatus = CalculateStatus(game),
                 Attempts = [],
-                HardMode = game.HardMode, 
+                HardMode = game.HardMode,
                 Hints = game.Hints
             };
 
@@ -107,7 +113,7 @@ namespace Server.Services {
                 UserId = userId,
                 Word = randomWord,
                 WordId = randomWord.Id,
-                HardMode = hardMode, 
+                HardMode = hardMode,
                 Hints = hints
             };
 
@@ -119,7 +125,7 @@ namespace Server.Services {
                 GameStatus = CalculateStatus(game),
                 Attempts = [],
                 HardMode = game.HardMode,
-                Hints = game.Hints, 
+                Hints = game.Hints,
                 Category = game.Hints ? randomWord.Category.Name : null
             };
 
@@ -169,6 +175,15 @@ namespace Server.Services {
 
             var newAchievements = await _achievementService.UpdateAchievements(userId);
             gameStatus = CalculateStatus(game);
+
+            if (gameStatus == GameStatus.Finished) {
+                await _lederboardService.AddLostGame(userId);
+            }
+
+            if (gameStatus == GameStatus.Won) {
+                await _lederboardService.AddWonGame(userId, game.HardMode, game.Hints);
+            }
+
             return new GameDto() {
                 Id = game.Id,
                 Attempts = [.. game.Attempts.Select(a => new AttemptDto() {
@@ -185,16 +200,16 @@ namespace Server.Services {
         }
 
         public async Task<IEnumerable<GameDto>> GetUserGamesAsync(string userId, int skip, int pageSize) {
-           var games = await _context.Games
-                .Where(g => g.UserId == userId)
-                .Include(g => g.Attempts)
-                .Include(g => g.Word)
-                .Include(g => g.Word!.Category)
-                .OrderByDescending(g => g.Id)
-                .Skip(skip)
-                .Take(pageSize)
-                .AsNoTracking() 
-                .ToListAsync();
+            var games = await _context.Games
+                 .Where(g => g.UserId == userId)
+                 .Include(g => g.Attempts)
+                 .Include(g => g.Word)
+                 .Include(g => g.Word!.Category)
+                 .OrderByDescending(g => g.Id)
+                 .Skip(skip)
+                 .Take(pageSize)
+                 .AsNoTracking()
+                 .ToListAsync();
 
             var gameDtos = games.Select(g => new GameDto {
                 Id = g.Id,
@@ -203,9 +218,9 @@ namespace Server.Services {
                     Attempt = a.AttemptedWord,
                     LettersState = CalculateLetterState(a, g.HardMode)
                 })],
-                HardMode = g.HardMode, 
+                HardMode = g.HardMode,
                 Hints = g.Hints,
-                Word = CalculateStatus(g) != GameStatus.InProgress ? g.Word?.Text : null, 
+                Word = CalculateStatus(g) != GameStatus.InProgress ? g.Word?.Text : null,
                 Category = g.Hints ? g.Word?.Category.Name : null
             }).ToList();
 
