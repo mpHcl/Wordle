@@ -1,0 +1,78 @@
+﻿@page "/leaderboard"
+
+@inject ILocalStorageService LocalStorage
+@inject HttpClient Http
+
+@using System.Globalization
+@using Shared
+@using Shared.Dtos
+
+<PageTitle>Leaderboard</PageTitle>
+
+<h1 class="text-2xl font-bold mb-4">Leaderboard</h1>
+@if (leaderboardEntries != null) {
+    <Client.Pages.Components.Leaderboard.Leaderboard LeaderboardEntries=leaderboardEntries />
+    <div class="history-pagination">
+        <button @onclick="LoadPreviousPage"
+                disabled="@(!HasPreviousPage)"
+                class="pager-btn">
+            ‹ Previous
+        </button>
+
+        <button @onclick="LoadNextPage"
+                disabled="@(!HasNextPage)"
+                class="pager-btn">
+            Next ›
+        </button>
+    </div>
+
+
+}
+else {
+    <p>Loading</p>
+}
+
+@code {
+    private IEnumerable<LeaderboardEntryDto>? leaderboardEntries;
+    private int page = 1;
+
+    private bool HasNextPage = true;
+    private bool HasPreviousPage => page > 1;
+
+    protected override async Task OnInitializedAsync() {
+        await LoadPage();
+    }
+
+    private async Task LoadPage() {
+        try {
+            var token = await LocalStorage.GetItemAsync<string>("authToken");
+            Http.DefaultRequestHeaders.Authorization =
+                new AuthenticationHeaderValue("Bearer", token);
+
+            var result = await Http.GetFromJsonAsync<IEnumerable<LeaderboardEntryDto>>(
+                $"/api/leaderboard?page={page}&pageSize=18"
+            );
+
+            leaderboardEntries = result;
+
+            HasNextPage = result?.Count() == 18;
+        }
+        catch (Exception ex) {
+            Console.WriteLine(ex.Message);
+        }
+    }
+
+    private async Task LoadNextPage() {
+        if (!HasNextPage) return;
+
+        page++;
+        await LoadPage();
+    }
+
+    private async Task LoadPreviousPage() {
+        if (page <= 1) return;
+
+        page--;
+        await LoadPage();
+    }
+}

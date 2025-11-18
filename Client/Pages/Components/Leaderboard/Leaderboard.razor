@@ -1,0 +1,34 @@
+@using System.Globalization
+@using Client.Pages.Components.GameHistory
+@using Shared
+@using Shared.Dtos
+
+@if (LeaderboardEntries?.Count() == 0) {
+    <p class="no-games-text">No games played yet.</p>
+}
+else {
+    <div class="game-history-container">
+        <table class="game-history-table">
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Points</th>
+                    <th>Games won</th>
+                    <th>Games played</th>
+                    <th>Win percentage</th>
+                    <th>Average guesses</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @foreach (var entry in LeaderboardEntries!) {
+                    <LeaderbordRow LeaderboardEntry="entry" />
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@code {
+    [Parameter] public IEnumerable<LeaderboardEntryDto>? LeaderboardEntries { get; set; }
+}

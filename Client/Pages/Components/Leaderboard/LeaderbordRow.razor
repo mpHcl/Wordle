@@ -1,0 +1,40 @@
+@using System.Globalization
+@using Shared
+@using Shared.Dtos
+
+
+<tr class="hover:bg-gray-50">
+    <td class="border border-gray-300 px-4 py-2">
+        @if (!string.IsNullOrEmpty(LeaderboardEntry.Username)) {
+            <span>@LeaderboardEntry.Username</span>
+        }
+        else {
+            <span class="text-gray-500 italic">-</span>
+        }
+    </td>
+
+    <td class="border border-gray-300 px-4 py-2">
+        @LeaderboardEntry.Points
+    </td>
+
+    <td class="border border-gray-300 px-4 py-2">
+        @LeaderboardEntry.GamesWon
+    </td>
+
+    <td class="border border-gray-300 px-4 py-2">
+        @LeaderboardEntry.GamesPlayed
+    </td>
+
+    <td class="border border-gray-300 px-4 py-2">
+        @LeaderboardEntry.WinPercentage.ToString("F2", CultureInfo.InvariantCulture)%
+    </td>
+
+    <td class="border border-gray-300 px-4 py-2">
+        @LeaderboardEntry.AverageGuesses.ToString("F2", CultureInfo.InvariantCulture)
+    </td>
+</tr>
+
+@code {
+    [Parameter]
+    public LeaderboardEntryDto LeaderboardEntry { get; set; } = default!;
+}
