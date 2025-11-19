@@ -4,7 +4,7 @@
 @inject NavigationManager Navigation
 
 @if (!hideLayout) {
-    <div class="page @(isDarkTheme ? "dark-theme" : "light-theme")">
+    <div class="page @themeClass">
         <div class="sidebar">
             <NavMenu />
         </div>
@@ -23,8 +23,7 @@ else {
 @code {
     private AuthenticationState? authState;
     private bool hideLayout;
-    private bool isDarkTheme = false;
-
+    private string themeClass = "light-theme";
 
     protected override async Task OnInitializedAsync() {
         if (!await LocalStorage.ContainKeyAsync("authToken"))
@@ -36,11 +35,24 @@ else {
         Navigation.LocationChanged += (_, __) => UpdateLayoutVisibility();
 
         if (await LocalStorage.ContainKeyAsync("darkMode")) {
-            isDarkTheme = await LocalStorage.GetItemAsync<bool>("darkMode");
+            if (await LocalStorage.GetItemAsync<bool>("darkMode")) {
+                themeClass = "dark-theme";
+            }
         }
         else {
-            // default: light
             await LocalStorage.SetItemAsync<bool>("darkMode", false);
+        }
+
+        if (await LocalStorage.ContainKeyAsync("highContrastMode"))
+        {
+            if (await LocalStorage.GetItemAsync<bool>("highContrastMode")) {
+                themeClass = "high-contrast-theme";
+            }
+            
+        }
+        else
+        {
+            await LocalStorage.SetItemAsync<bool>("highContrastMode", false);
         }
     }
 

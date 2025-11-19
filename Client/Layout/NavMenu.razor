@@ -1,6 +1,6 @@
 ﻿<div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
-        <a class="navbar-brand" href="">Wordle</a>
+        <a class="navbar-brand text-light" href="">Wordle</a>
     </div>
 </div>
 
@@ -9,23 +9,23 @@
 
         <!-- Main navigation -->
         <div>
-            <NavLink class="nav-link text-light px-3" href="daily-challenge">
+            <NavLink class="nav-link text-light" href="daily-challenge">
                 <span class="bi bi-lightning-charge-fill me-2"></span> Daily Challenge
             </NavLink>
 
-            <NavLink class="nav-link text-light px-3" href="new-game">
+            <NavLink class="nav-link text-light" href="new-game">
                 <span class="bi bi-controller me-2"></span> New Game (Free Play)
             </NavLink>
 
-            <NavLink class="nav-link text-light px-3" href="history">
+            <NavLink class="nav-link text-light" href="history">
                 <span class="bi bi-clock-history me-2"></span> History
             </NavLink>
 
-            <NavLink class="nav-link text-light px-3" href="achievements">
+            <NavLink class="nav-link text-light" href="achievements">
                 <span class="bi bi-trophy-fill me-2"></span> Achievements
             </NavLink>
 
-            <NavLink class="nav-link text-light px-3" href="leaderboard">
+            <NavLink class="nav-link text-light" href="leaderboard">
                 <span class="bi bi-bar-chart-fill me-2"></span> Leaderboard
             </NavLink>
         </div>
@@ -43,3 +43,17 @@
     </nav>
 </div>
 
+<style>
+    .active {
+        background-color: var(--nav-item-active);
+        color: var(--text-color);
+    }
+
+    .sidebar {
+        width: 250px;
+        height: 100vh;
+        position: sticky;
+        top: 0;
+        background-color: var(--nav-bg);
+    }
+</style>

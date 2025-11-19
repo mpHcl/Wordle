@@ -114,14 +114,6 @@ code {
 }
 
 
-.sidebar {
-    width: 250px;
-    transition: width 0.3s ease;
-    background-color: #222;
-    color: white;
-    overflow-x: hidden;
-}
-
 .collapsed {
     width: 0;
     overflow: hidden;
