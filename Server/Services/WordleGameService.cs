@@ -2,6 +2,7 @@
 using Server.Database;
 using Server.Exceptions;
 using Server.Models;
+using Server.Services.Interfaces;
 using Shared.Dtos;
 using System;
 
@@ -12,10 +13,18 @@ namespace Server.Services {
         ILeaderboardService leaderboardService
     ) : IWordleGameService {
 
-        private readonly WordleDbContext _context = context;
-        private readonly IAchievementService _achievementService = achievementService;
-        private readonly ILeaderboardService _lederboardService = leaderboardService;
+        private readonly WordleDbContext _context = context ?? throw new ArgumentNullException(nameof(context));
+        private readonly IAchievementService _achievementService = achievementService ?? throw new ArgumentNullException(nameof(achievementService));
+        private readonly ILeaderboardService _leaderboardService = leaderboardService ?? throw new ArgumentNullException(nameof(leaderboardService));
         private static readonly Random _random = new();
+
+        private static GameStatus CalculateStatus(Game game) {
+            if (game.IsWon)
+                return GameStatus.Won;
+
+            var attempts = game.Attempts.Count;
+            return attempts >= 6 ? GameStatus.Finished : GameStatus.InProgress;
+        }
 
         private static List<State> CalculateLetterState(GameAttempt attempt, bool hardMode) {
             var wordExpected = attempt.Game?.Word?.Text.ToUpper();
@@ -41,24 +50,9 @@ namespace Server.Services {
             return result;
         }
 
-        public async Task<GameDto> GetOrCreateGameForDailyChallenge(int challengeId, string userId) {
-            var gameDto = await GetChallangeGame(challengeId, userId);
-            return gameDto ?? await CreateChallengeGame(challengeId, userId);
-        }
-
-        private async Task<GameDto?> GetChallangeGame(int challengeId, string userId) {
-            var game = await _context.Games
-                .Where(game => game.DailyChallangeId == challengeId && game.UserId == userId)
-                .Include(g => g.Attempts)
-                .Include(g => g.Word)
-                .FirstOrDefaultAsync();
-
-            if (game is null) {
-                return null;
-            }
-
+        private static GameDto MapGameToDto(Game game) {
             var gameStatus = CalculateStatus(game);
-            var result = new GameDto() {
+            return new GameDto() {
                 Id = game.Id,
                 GameStatus = gameStatus,
                 Attempts = [.. game.Attempts.Select(a => new AttemptDto {
@@ -67,15 +61,43 @@ namespace Server.Services {
                 })],
                 Hints = game.Hints,
                 HardMode = game.HardMode,
+                Category = game.Hints ? game.Word?.Category.Name : null,
                 Word = gameStatus != GameStatus.InProgress ? game.Word?.Text : null
             };
-
-            return result;
         }
 
-        private async Task<GameDto> CreateChallengeGame(int challengeId, string userId) {
-            var user = await _context.Users.Include(u => u.Settings).FirstAsync(u => u.Id == userId);
-            var dailyChallenge = await _context.DailyChallenges.FirstAsync(dc => dc.Id == challengeId);
+        public async Task<GameDto> GetOrCreateGameForDailyChallenge(int challengeId, string userId) {
+            var gameDto = await GetChallengeGameAsync(challengeId, userId);
+            return gameDto ?? await CreateChallengeGameAsync(challengeId, userId);
+        }
+
+        private async Task<GameDto?> GetChallengeGameAsync(int challengeId, string userId) {
+            var game = await _context.Games
+                .Where(game => game.DailyChallangeId == challengeId && game.UserId == userId)
+                .Include(g => g.Attempts)
+                .Include(g => g.Word)
+                    .ThenInclude(w => w!.Category)
+                .AsNoTracking()
+                .FirstOrDefaultAsync();
+
+            if (game is null) {
+                return null;
+            }
+
+            
+            return MapGameToDto(game);
+        }
+
+        private async Task<GameDto> CreateChallengeGameAsync(int challengeId, string userId) {
+            var user = await _context.Users
+                .Include(u => u.Settings)
+                .FirstAsync(u => u.Id == userId)
+                .ConfigureAwait(false);
+
+            var dailyChallenge = await _context.DailyChallenges
+                .FirstAsync(dc => dc.Id == challengeId)
+                .ConfigureAwait(false);
+
             var game = new Game {
                 User = user,
                 UserId = userId,
@@ -86,27 +108,31 @@ namespace Server.Services {
                 Hints = false
             };
 
-            _context.Games.Add(game);
-            _context.SaveChanges();
+            await _context.Games.AddAsync(game);
+            await _context.SaveChangesAsync();
 
-            var gameDto = new GameDto {
-                Id = game.Id,
-                GameStatus = CalculateStatus(game),
-                Attempts = [],
-                HardMode = game.HardMode,
-                Hints = game.Hints
-            };
-
-            return gameDto;
+            return MapGameToDto(game);
         }
 
-        public async Task<GameDto> CreateNewGame(string userId) {
-            var user = await _context.Users.Include(u => u.Settings).FirstAsync(u => u.Id == userId);
+        public async Task<GameDto> CreateNewGameAsync(string userId) {
+            var user = await _context.Users
+                .Include(u => u.Settings)
+                .FirstAsync(u => u.Id == userId)
+                .ConfigureAwait(false);
+
             var hardMode = user.Settings.HardMode;
             var hints = user.Settings.ShowHints;
-            var wordsIds = await _context.Words.Select(w => w.Id).ToListAsync();
-            var randomWordId = wordsIds[_random.Next(0, wordsIds.Count)];
-            var randomWord = await _context.Words.Include(w => w.Category).FirstAsync(w => w.Id == randomWordId);
+
+            var total = await _context.Words.CountAsync().ConfigureAwait(false);
+            if (total == 0) throw new InvalidOperationException("No words available.");
+
+            var skip = _random.Next(0, total);
+            var randomWord = await _context.Words
+                .Include(w => w.Category)
+                .Skip(skip)
+                .FirstAsync()
+                .ConfigureAwait(false); 
+
 
             var game = new Game {
                 User = user,
@@ -117,44 +143,29 @@ namespace Server.Services {
                 Hints = hints
             };
 
-            _context.Games.Add(game);
-            _context.SaveChanges();
+            await _context.Games.AddAsync(game);
+            await _context.SaveChangesAsync();
 
-            var gameDto = new GameDto {
-                Id = game.Id,
-                GameStatus = CalculateStatus(game),
-                Attempts = [],
-                HardMode = game.HardMode,
-                Hints = game.Hints,
-                Category = game.Hints ? randomWord.Category.Name : null
-            };
 
-            return gameDto;
+            return MapGameToDto(game);
         }
 
-        private static GameStatus CalculateStatus(Game game) {
-            if (game.IsWon) {
-                return GameStatus.Won;
-            }
-            else if (game.Attempts.Count == 6) {
-                return GameStatus.Finished;
-            }
-            else {
-                return GameStatus.InProgress;
-            }
-        }
         public async Task<GameDto> MakeAttempt(int gameId, string attempt, string userId) {
             attempt = attempt.ToUpper();
+            await ValidateAttemptAsync(attempt).ConfigureAwait(false);
+
             var game = await _context.Games
                 .Include(g => g.Attempts)
                 .Include(g => g.Word)
-                .Include(g => g.Word!.Category)
+                    .ThenInclude(w => w!.Category)
                 .Where(g => g.Id == gameId && g.UserId == userId)
-                .FirstOrDefaultAsync() ?? throw new Exception("Game not found for this user.");
+                .FirstOrDefaultAsync()
+                .ConfigureAwait(false)
+                ?? throw new GameNotFoundException($"Game with id {gameId} not found for this user.");
 
-            var gameStatus = CalculateStatus(game);
+            var statusBeforeAttempt = CalculateStatus(game);
 
-            if (gameStatus != GameStatus.InProgress) {
+            if (statusBeforeAttempt != GameStatus.InProgress) {
                 throw new GameAlreadyFinishedException("Game already finished.");
             }
 
@@ -167,36 +178,41 @@ namespace Server.Services {
 
             await _context.AddAsync(newAttempt);
 
-            if (game.Word?.Text.ToUpper() == attempt) {
+            if (string.Equals(game.Word?.Text, attempt, StringComparison.OrdinalIgnoreCase)) {
                 game.IsWon = true;
             }
 
             await _context.SaveChangesAsync();
 
-            var newAchievements = await _achievementService.UpdateAchievements(userId);
-            gameStatus = CalculateStatus(game);
+            var newAchievements = await _achievementService.UpdateAchievements(userId).ConfigureAwait(false);
+            var statusAfterAttempt = CalculateStatus(game);
 
+            await UpdateLeaderboardAsync(userId, game, statusAfterAttempt);
+
+            var dto = MapGameToDto(game);
+            dto.NewAchievements = [.. newAchievements];
+            return dto;
+        }
+
+        private async Task ValidateAttemptAsync(string attempt) {
+            var exists = await _context.WordsValidations
+                .AsNoTracking()
+                .AnyAsync(w => w.Text == attempt)
+                .ConfigureAwait(false);
+
+            if (!exists) {
+                throw new InvalidWordAttemptException($"Word {attempt} is not a valid word.");
+            }
+        }
+
+        private async Task UpdateLeaderboardAsync(string userId, Game game, GameStatus gameStatus) {
             if (gameStatus == GameStatus.Finished) {
-                await _lederboardService.AddLostGame(userId);
+                await _leaderboardService.AddLostGame(userId).ConfigureAwait(false);
             }
 
             if (gameStatus == GameStatus.Won) {
-                await _lederboardService.AddWonGame(userId, game.HardMode, game.Hints);
+                await _leaderboardService.AddWonGame(userId, game.HardMode, game.Hints).ConfigureAwait(false);
             }
-
-            return new GameDto() {
-                Id = game.Id,
-                Attempts = [.. game.Attempts.Select(a => new AttemptDto() {
-                    Attempt = a.AttemptedWord,
-                    LettersState = CalculateLetterState(a, game.HardMode)
-                })],
-                GameStatus = gameStatus,
-                HardMode = game.HardMode,
-                Hints = game.Hints,
-                Word = gameStatus != GameStatus.InProgress ? game.Word?.Text : null,
-                Category = game.Hints ? game.Word?.Category.Name : null,
-                NewAchievements = [.. newAchievements]
-            };
         }
 
         public async Task<IEnumerable<GameDto>> GetUserGamesAsync(string userId, int skip, int pageSize) {
@@ -209,46 +225,22 @@ namespace Server.Services {
                  .Skip(skip)
                  .Take(pageSize)
                  .AsNoTracking()
-                 .ToListAsync();
+                 .ToListAsync()
+                 .ConfigureAwait(false);
 
-            var gameDtos = games.Select(g => new GameDto {
-                Id = g.Id,
-                GameStatus = CalculateStatus(g),
-                Attempts = [.. g.Attempts.Select(a => new AttemptDto {
-                    Attempt = a.AttemptedWord,
-                    LettersState = CalculateLetterState(a, g.HardMode)
-                })],
-                HardMode = g.HardMode,
-                Hints = g.Hints,
-                Word = CalculateStatus(g) != GameStatus.InProgress ? g.Word?.Text : null,
-                Category = g.Hints ? g.Word?.Category.Name : null
-            }).ToList();
-
-            return gameDtos;
+            return [.. games.Select(MapGameToDto)];
         }
 
         public async Task<GameDto?> GetGameByIdAsync(string userId, int gameId) {
             var game = await _context.Games.Where(g => g.UserId == userId && g.Id == gameId)
                 .Include(g => g.Attempts)
                 .Include(g => g.Word)
-                .Include(g => g.Word!.Category)
+                    .ThenInclude(w => w!.Category)
                 .AsNoTracking()
-                .FirstAsync();
+                .FirstOrDefaultAsync()
+                .ConfigureAwait(false);
 
-            var result = new GameDto {
-                Id = game.Id,
-                GameStatus = CalculateStatus(game),
-                Attempts = [.. game.Attempts.Select(a => new AttemptDto {
-                    Attempt = a.AttemptedWord,
-                    LettersState = CalculateLetterState(a, game.HardMode)
-                })],
-                HardMode = game.HardMode,
-                Hints = game.Hints,
-                Word = CalculateStatus(game) != GameStatus.InProgress ? game.Word!.Text : null,
-                Category = game.Hints ? game.Word?.Category.Name : null
-            };
-
-            return result;
+            return game is null ? null : MapGameToDto(game);
         }
     }
 }

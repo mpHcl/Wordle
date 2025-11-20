@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Server.Database;
 using Server.Models;
+using Server.Services.Interfaces;
 using Shared.Dtos;
 
 namespace Server.Services {

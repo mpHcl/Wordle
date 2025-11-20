@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Server.Exceptions;
-using Server.Services;
+using Server.Services.Interfaces;
 using System.Security.Claims;
 
 namespace Server.Controllers {
@@ -29,7 +29,7 @@ namespace Server.Controllers {
         [HttpGet("new_game")]
         public async Task<IActionResult> GetNewGame() {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value!;
-            return Ok(await _wordleGameService.CreateNewGame(userId));
+            return Ok(await _wordleGameService.CreateNewGameAsync(userId));
         }
 
         [Authorize]
@@ -41,6 +41,9 @@ namespace Server.Controllers {
             }
             catch (GameAlreadyFinishedException ex) {
                 return Conflict(new { message = ex.Message });
+            }
+            catch (InvalidWordAttemptException ex) {
+                return BadRequest(new { message = ex.Message });
             }
         }
 

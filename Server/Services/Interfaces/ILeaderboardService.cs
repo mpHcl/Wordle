@@ -1,7 +1,6 @@
-﻿
-using Shared.Dtos;
+﻿using Shared.Dtos;
 
-namespace Server.Services {
+namespace Server.Services.Interfaces {
     public interface ILeaderboardService {
         Task AddLostGame(string userId);
         Task AddWonGame(string userId, bool hardMode, bool hints);

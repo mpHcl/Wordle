@@ -12,10 +12,14 @@
             if (!dbContext.Achievements.Any()) {
                 InitAchievements(dbContext);
             }
+
+            if (!dbContext.WordsValidations.Any()) {
+                InitWordsValidation(dbContext);
+            }
         }
 
         private static void InitAchievements(WordleDbContext dbContext) {
-            var defaultAchievements = new List<Models.Achievement> 
+            var defaultAchievements = new List<Models.Achievement>
             {
                 new () {
                     Name = "First Solve!",
@@ -57,14 +61,17 @@
                 new() { Text = "WOODS", Category = category["Nature"] },
                 new() { Text = "PLANT", Category = category["Nature"] },
                 new() { Text = "EARTH", Category = category["Nature"] },
-                new() { Text = "BLOSS", Category = category["Nature"] },
-                new() { Text = "CAVEA", Category = category["Nature"] },
+                new() { Text = "ATOLL", Category = category["Nature"] },
+                new() { Text = "CAVES", Category = category["Nature"] },
                 new() { Text = "SWAMP", Category = category["Nature"] },
+                new() { Text = "OASIS", Category = category["Nature"] },
+                new() { Text = "DUNES", Category = category["Nature"] },
+                new() { Text = "DELTA", Category = category["Nature"] },
 
                 // Adjectives
                 new() { Text = "HEAVY", Category = category["Adjectives"] },
                 new() { Text = "WEIRD", Category = category["Adjectives"] },
-                new() { Text = "SUREL", Category = category["Adjectives"] },
+                new() { Text = "LOCAL", Category = category["Adjectives"] },
                 new() { Text = "TIDAL", Category = category["Adjectives"] },
                 new() { Text = "WORSE", Category = category["Adjectives"] },
                 new() { Text = "READY", Category = category["Adjectives"] },
@@ -94,7 +101,7 @@
                 new() { Text = "GHANA", Category = category["Geography"] },
                 new() { Text = "ITALY", Category = category["Geography"] },
                 new() { Text = "JAPAN", Category = category["Geography"] },
-                new() { Text = "IDNIA", Category = category["Geography"] },
+                new() { Text = "INDIA", Category = category["Geography"] },
                 
                 // Food & drink
                 new() { Text = "APPLE", Category = category["Food & Drink"] },
@@ -140,6 +147,20 @@
             dbContext.WordCategories.AddRange(defaultCategories);
             dbContext.SaveChanges();
             return defaultCategories;
+        }
+
+        private static void InitWordsValidation(WordleDbContext context) {
+            var filePath = "Database/WORDS.txt";
+            if (!File.Exists(filePath)) {
+                throw new FileNotFoundException("Words validation file not found.", filePath);
+            }
+
+            var words = File.ReadAllLines(filePath)
+                .Where(line => !string.IsNullOrWhiteSpace(line))
+                .Select(line => new Models.WordsValidation { Text = line.Trim().ToUpper() })
+                .ToList();
+            context.WordsValidations.AddRange(words);
+            context.SaveChanges();
         }
     }
 }

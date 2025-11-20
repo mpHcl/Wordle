@@ -5,6 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using Server.Database;
 using Server.Models;
 using Server.Services;
+using Server.Services.Interfaces;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);

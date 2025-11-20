@@ -1,6 +1,6 @@
 ﻿using Shared.Dtos;
 
-namespace Server.Services {
+namespace Server.Services.Interfaces {
     public interface IAchievementService {
         Task<ICollection<AchievementDto>> UpdateAchievements(string userId);
         Task<AchievementDto> GetAchievementDetails(int achievementId);

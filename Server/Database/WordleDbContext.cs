@@ -13,6 +13,7 @@ namespace Server.Database {
         public DbSet<Word> Words { get; set; }
         public DbSet<WordCategory> WordCategories { get; set; }
         public DbSet<WordleSettings> WordleSettings { get; set; }
+        public DbSet<WordsValidation> WordsValidations { get; set; }
 
         public WordleDbContext(DbContextOptions<WordleDbContext> options) : base(options) {
 
@@ -91,6 +92,10 @@ namespace Server.Database {
                 .WithMany()
                 .HasForeignKey(dc => dc.WordId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<WordsValidation>()
+                .HasIndex(wv => wv.Text)
+                .IsUnique();
         }
 
     }

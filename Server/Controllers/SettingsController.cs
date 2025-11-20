@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Server.Models;
-using Server.Services;
+using Server.Services.Interfaces;
 using Shared.Dtos;
 using System.Security.Claims;
 
