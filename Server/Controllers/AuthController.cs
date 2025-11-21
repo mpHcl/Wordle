@@ -91,7 +91,13 @@ namespace Server.Controllers {
         public async Task<IActionResult> RefreshToken() {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value!;
             var user = await _context.Users.FindAsync(userId);
-
+            var expClaim = User.FindFirst(JwtRegisteredClaimNames.Exp)?.Value;
+            if (expClaim != null && long.TryParse(expClaim, out long exp)) {
+                var expirationTime = DateTimeOffset.FromUnixTimeSeconds(exp).UtcDateTime;
+                if (expirationTime > DateTime.UtcNow.AddDays(1)) {
+                    return BadRequest("Token not close enough to expiration.");
+                }
+            }
 
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.UTF8.GetBytes(configuration["Jwt:Key"]
