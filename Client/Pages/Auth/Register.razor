@@ -106,14 +106,16 @@
             Navigation.NavigateTo("/login");
         }
         else {
-            Console.WriteLine("HERE WE GO");
             var responseContent = await response.Content.ReadFromJsonAsync<JsonElement>();
 
             messages = new();
 
-            Console.WriteLine(responseContent);
+            if (responseContent.ValueKind == JsonValueKind.Object) {
+                messages.Add("The Email field is not a valid e-mail address.");
+                return;
+            }
 
-            foreach (var error in responseContent.EnumerateArray()) {
+            foreach (var error in responseContent.EnumerateArray() ) {
                 var description = error.GetProperty("description").GetString();
                 messages.Add($"{description}");
             }
