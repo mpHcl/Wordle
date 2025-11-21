@@ -2,6 +2,7 @@
 @inject ILocalStorageService LocalStorage
 @inject AuthenticationStateProvider AuthProvider
 @inject NavigationManager Navigation
+@inject HttpClient Http
 
 @if (!hideLayout) {
     <div class="page @themeClass">
@@ -26,31 +27,51 @@ else {
     private string themeClass = "light-theme";
 
     protected override async Task OnInitializedAsync() {
+        await SetupThemesAsync();
+        UpdateLayoutVisibility();
+        Navigation.LocationChanged += (_, __) => UpdateLayoutVisibility();
+
+        await RefreshToken();
+        authState = await AuthProvider.GetAuthenticationStateAsync();
+    }
+
+    private async Task RefreshToken()
+    {
         if (!await LocalStorage.ContainKeyAsync("authToken"))
         {
             Navigation.NavigateTo("/login");
         }
-        authState = await AuthProvider.GetAuthenticationStateAsync();
-        UpdateLayoutVisibility();
-        Navigation.LocationChanged += (_, __) => UpdateLayoutVisibility();
 
-        if (await LocalStorage.ContainKeyAsync("darkMode")) {
-            if (await LocalStorage.GetItemAsync<bool>("darkMode")) {
+        var response = await Http.GetAsync("/api/auth/refresh");
+        if (!response.IsSuccessStatusCode)
+        {
+            Navigation.NavigateTo("/login");
+        }
+
+        var newToken = await response.Content.ReadAsStringAsync();
+        await LocalStorage.SetItemAsync("authToken", newToken);
+    }
+
+    private async Task SetupThemesAsync()
+    {
+        if (await LocalStorage.ContainKeyAsync("darkMode"))
+        {
+            if (await LocalStorage.GetItemAsync<bool>("darkMode"))
+            {
                 themeClass = "dark-theme";
             }
-        }
-        else {
+        } else
+        {
             await LocalStorage.SetItemAsync<bool>("darkMode", false);
         }
 
         if (await LocalStorage.ContainKeyAsync("highContrastMode"))
         {
-            if (await LocalStorage.GetItemAsync<bool>("highContrastMode")) {
+            if (await LocalStorage.GetItemAsync<bool>("highContrastMode"))
+            {
                 themeClass = "high-contrast-theme";
             }
-            
-        }
-        else
+        } else
         {
             await LocalStorage.SetItemAsync<bool>("highContrastMode", false);
         }

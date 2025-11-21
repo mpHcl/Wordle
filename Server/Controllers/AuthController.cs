@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -56,7 +57,7 @@ namespace Server.Controllers {
                     ?? throw new InvalidDataException($"User {user.Id}, does not have username.")),
                     new Claim(ClaimTypes.NameIdentifier, user.Id)
                 ]),
-                Expires = DateTime.UtcNow.AddHours(24),
+                Expires = DateTime.UtcNow.AddHours(48),
                 Issuer = configuration["Jwt:Issuer"],
                 Audience = configuration["Jwt:Issuer"],
                 SigningCredentials = new SigningCredentials(
@@ -82,6 +83,40 @@ namespace Server.Controllers {
                     HighContrastMode = settings.HighContrastMode
                 }
             });
+        }
+
+        // POST /api/auth/register
+        [HttpGet("refresh")]
+        [Authorize]
+        public async Task<IActionResult> RefreshToken() {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value!;
+            var user = await _context.Users.FindAsync(userId);
+
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.UTF8.GetBytes(configuration["Jwt:Key"]
+                ?? throw new InvalidOperationException("JWT Key not found in configuration."));
+
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(
+                [
+                    new Claim(ClaimTypes.Name, user.UserName
+                    ?? throw new InvalidDataException($"User {user.Id}, does not have username.")),
+                    new Claim(ClaimTypes.NameIdentifier, user.Id)
+                ]),
+                Expires = DateTime.UtcNow.AddHours(48),
+                Issuer = configuration["Jwt:Issuer"],
+                Audience = configuration["Jwt:Issuer"],
+                SigningCredentials = new SigningCredentials(
+                    new SymmetricSecurityKey(key),
+                    SecurityAlgorithms.HmacSha256Signature
+                )
+            };
+
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+
+            return Ok(tokenHandler.WriteToken(token));
         }
     }
 }
