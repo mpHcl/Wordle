@@ -67,13 +67,9 @@ else {
             var token = await LocalStorage.GetItemAsync<string>("authToken");
             Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-            var response = await Http.PostAsJsonAsync($"/api/game/{GameDto?.Id}/attempt", Current);
+            var response = await Http.PostAsJsonAsync($"/api/games/{GameDto?.Id}/attempt", Current);
             if (response.IsSuccessStatusCode) {
                 GameDto = await response.Content.ReadFromJsonAsync<GameDto>();
-                if (GameDto?.NewAchievements?.Count > 0)
-                {
-                    Console.WriteLine("Test");
-                }
             }
         }
         catch (Exception ex) {
@@ -108,11 +104,6 @@ else {
                     KeyStates[letter] = newState;
                 }
             }
-        }
-
-        // Debug print
-        foreach (var kvp in KeyStates) {
-            Console.WriteLine($"{kvp.Key} - {kvp.Value}");
         }
     }
 

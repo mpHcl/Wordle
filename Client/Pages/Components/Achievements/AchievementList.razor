@@ -32,7 +32,7 @@
 
     async Task OpenModal(int id) {
         try {
-            selected = await Http.GetFromJsonAsync<AchievementDto>($"/api/achievements/achievement/{id}");
+            selected = await Http.GetFromJsonAsync<AchievementDto>($"/api/achievements/{id}");
         }
         catch (Exception ex) {
             Console.WriteLine(ex.Message);

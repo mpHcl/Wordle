@@ -57,7 +57,9 @@
             var token = await LocalStorage.GetItemAsync<string>("authToken");
             Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-            Game = await Http.GetFromJsonAsync<GameDto>("/api/game/new_game");
+            var response = await Http.PostAsync("/api/games", null);
+            response.EnsureSuccessStatusCode();
+            Game = await response.Content.ReadFromJsonAsync<GameDto>();
         }
         catch (Exception ex) {
             Console.WriteLine(ex.Message);

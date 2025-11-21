@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Server.Database;
+using Server.Exceptions;
 using Server.Models;
 using Server.Services.Interfaces;
 using Shared.Dtos;
@@ -10,12 +11,14 @@ namespace Server.Services {
     public class AchievementService(UserManager<WordleUser> userManager, WordleDbContext context)
             : IAchievementService {
 
-        private readonly WordleDbContext _context = context;
-        private readonly UserManager<WordleUser> _userManager = userManager;
+        private readonly WordleDbContext _context = context 
+            ?? throw new ArgumentNullException(nameof(context));
+        private readonly UserManager<WordleUser> _userManager = userManager 
+            ?? throw new ArgumentNullException(nameof(userManager));
 
         public async Task<AchievementDto> GetAchievementDetails(int achievementId) {
             var achievement = await _context.Achievements.FindAsync(achievementId)
-                ?? throw new Exception("Not found");
+                ?? throw new ObjectNotFoundException($"Achievement {achievementId} not found.");
             var num_of_achievements = await _context.UserAchievements
                                                         .Where(a => a.AchievementId == achievementId)
                                                         .CountAsync();

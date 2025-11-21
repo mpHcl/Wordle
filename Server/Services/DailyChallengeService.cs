@@ -6,7 +6,9 @@ using Shared.Dtos;
 
 namespace Server.Services {
     public class DailyChallengeService(WordleDbContext context) : IDailyChallengeService {
-        private readonly WordleDbContext _context = context;
+        private readonly WordleDbContext _context = context 
+            ?? throw new ArgumentNullException(nameof(context));
+
         private static readonly Random _random = new();
 
         public async Task<DailyChallengeDto> CreateToday() {

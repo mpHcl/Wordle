@@ -64,7 +64,7 @@
                 NoCache = true,
                 NoStore = true
             };
-            GameItem = await Http.GetFromJsonAsync<GameDto>($"/api/game/{GameId}");
+            GameItem = await Http.GetFromJsonAsync<GameDto>($"/api/games/{GameId}");
         }
         catch (Exception ex) {
             Console.WriteLine(ex.Message);

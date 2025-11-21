@@ -54,7 +54,7 @@ else {
                 new AuthenticationHeaderValue("Bearer", token);
 
             var result = await Http.GetFromJsonAsync<IEnumerable<GameDto>>(
-                $"/api/game/games?page={page}&pageSize=18"
+                $"/api/games?page={page}&pageSize=18"
             );
 
             gamesHistory = result;

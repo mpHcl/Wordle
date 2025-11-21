@@ -30,7 +30,7 @@ else {
             var token = await LocalStorage.GetItemAsync<string>("authToken");
             Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-            return await Http.GetFromJsonAsync<List<AchievementDto>>("/api/achievements/achievements");
+            return await Http.GetFromJsonAsync<List<AchievementDto>>("/api/achievements");
         }
         catch (Exception ex) {
             Console.WriteLine(ex.Message);

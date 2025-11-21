@@ -13,9 +13,12 @@ namespace Server.Services {
         ILeaderboardService leaderboardService
     ) : IWordleGameService {
 
-        private readonly WordleDbContext _context = context ?? throw new ArgumentNullException(nameof(context));
-        private readonly IAchievementService _achievementService = achievementService ?? throw new ArgumentNullException(nameof(achievementService));
-        private readonly ILeaderboardService _leaderboardService = leaderboardService ?? throw new ArgumentNullException(nameof(leaderboardService));
+        private readonly WordleDbContext _context = context 
+            ?? throw new ArgumentNullException(nameof(context));
+        private readonly IAchievementService _achievementService = achievementService 
+            ?? throw new ArgumentNullException(nameof(achievementService));
+        private readonly ILeaderboardService _leaderboardService = leaderboardService 
+            ?? throw new ArgumentNullException(nameof(leaderboardService));
         private static readonly Random _random = new();
 
         private static GameStatus CalculateStatus(Game game) {
@@ -161,7 +164,7 @@ namespace Server.Services {
                 .Where(g => g.Id == gameId && g.UserId == userId)
                 .FirstOrDefaultAsync()
                 .ConfigureAwait(false)
-                ?? throw new GameNotFoundException($"Game with id {gameId} not found for this user.");
+                ?? throw new ObjectNotFoundException($"Game with id {gameId} not found for this user.");
 
             var statusBeforeAttempt = CalculateStatus(game);
 
