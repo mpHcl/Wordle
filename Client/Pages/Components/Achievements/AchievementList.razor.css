@@ -42,7 +42,7 @@
 .achieved-badge {
     padding: 2px 6px;
     border-radius: 4px;
-    background: rgba(0, 150, 50, 0.15);
+    background: rgba(0, 150, 50, 0.05); /* lighter, more transparent */
     color: rgb(0, 180, 60);
     font-weight: 600;
 }

@@ -50,12 +50,12 @@ else {
                 new AuthenticationHeaderValue("Bearer", token);
 
             var result = await Http.GetFromJsonAsync<IEnumerable<LeaderboardEntryDto>>(
-                $"/api/leaderboard?page={page}&pageSize=18"
+                $"/api/leaderboard?page={page}&pageSize=16"
             );
 
             leaderboardEntries = result;
 
-            HasNextPage = result?.Count() == 18;
+            HasNextPage = result?.Count() == 16;
         }
         catch (Exception ex) {
             Console.WriteLine(ex.Message);

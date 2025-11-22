@@ -1,0 +1,32 @@
+@inject NavigationManager Navigation
+
+
+@using Shared.Dtos
+@if (ShowModal) {
+    @if (GameDto?.GameStatus == GameStatus.Won) {
+        <div class="modal-overlay" @onclick="@(() => ShowModal = false)">
+            <div class="modal-window" @onclick:stopPropagation>
+                <h3 class="modal-title">Congratulations!!</h3>
+                <p class="modal-text">You've won!!</p>
+                <p class="modal-text">You guessed @GameDto.Word!!</p>
+                <button class="modal-button" @onclick='() => Navigation.NavigateTo("new-game")'>New game</button>
+            </div>
+        </div>
+    }
+    else if (GameDto?.GameStatus == GameStatus.Finished) {
+        <div class="modal-overlay" @onclick="@(() => ShowModal = false)">
+            <div class="modal-window" @onclick:stopPropagation>
+                <h3 class="modal-title">Nice try!!</h3>
+                <p class="modal-text">You've lost...</p>
+                <p class="modal-text">The word was:  @GameDto.Word</p>
+                <button class="modal-button" @onclick='() => Navigation.NavigateTo("new-game")'>New game</button>
+            </div>
+        </div>
+    }
+}
+
+
+@code {
+    [Parameter] public GameDto? GameDto { get; set; }
+    private bool ShowModal { get; set; } = true;
+}

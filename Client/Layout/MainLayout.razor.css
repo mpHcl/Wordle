@@ -42,7 +42,7 @@ main {
 
 
 .top-row {
-    background-color: #f7f7f7;
+    background-color: #1F1F1F;
     border-bottom: 1px solid #d6d5d5;
     justify-content: flex-end;
     height: 3.5rem;
@@ -83,7 +83,7 @@ main {
     }
 
     .sidebar {
-        width: 250px;
+        width: 200px;
         height: 100vh;
         position: sticky;
         top: 0;

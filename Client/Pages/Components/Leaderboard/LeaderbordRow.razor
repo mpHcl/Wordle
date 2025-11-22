@@ -4,7 +4,7 @@
 
 
 <tr class="hover:bg-gray-50">
-    <td class="border border-gray-300 px-4 py-2">
+    <td>
         @if (!string.IsNullOrEmpty(LeaderboardEntry.Username)) {
             <span>@LeaderboardEntry.Username</span>
         }
@@ -13,23 +13,23 @@
         }
     </td>
 
-    <td class="border border-gray-300 px-4 py-2">
+    <td>
         @LeaderboardEntry.Points
     </td>
 
-    <td class="border border-gray-300 px-4 py-2">
+    <td>
         @LeaderboardEntry.GamesWon
     </td>
 
-    <td class="border border-gray-300 px-4 py-2">
+    <td>
         @LeaderboardEntry.GamesPlayed
     </td>
 
-    <td class="border border-gray-300 px-4 py-2">
+    <td>
         @LeaderboardEntry.WinPercentage.ToString("F2", CultureInfo.InvariantCulture)%
     </td>
 
-    <td class="border border-gray-300 px-4 py-2">
+    <td>
         @LeaderboardEntry.AverageGuesses.ToString("F2", CultureInfo.InvariantCulture)
     </td>
 </tr>

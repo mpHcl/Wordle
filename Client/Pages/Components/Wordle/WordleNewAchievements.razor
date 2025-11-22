@@ -3,22 +3,36 @@
 @using Shared
 @using Shared.Dtos
 
-@if (Achievements?.Count > 0) {
-    <div class="achievements">
-        <h3>
-            New Achievements Unlocked!
 
-    </h3>
-        <ul>
-            @foreach (var achievement in Achievements) {
-                <li>@achievement.Name</li>
-            }
-        </ul>
+@if (Achievements?.Count > 0 && !Closed) {
+    <div class="modal-overlay" @onclick="@(() => Closed = true)">
+        <div class="modal-window" @onclick:stopPropagation>
+            <h3 class="modal-title">New Achievements Unlocked!</h3>
+            <ul>
+                @foreach (var achievement in Achievements) {
+                    <li>@achievement.Name</li>
+                }
+            </ul>
+            <button class="modal-button" @onclick=@(() => Closed = true)>Close</button>
+        </div>
     </div>
-    <a href="/achievements">(Check achievements page)</a>
 }
 
 @code {
     [Parameter]
     public List<AchievementDto>? Achievements { get; set; }
+
+    private bool Closed { get; set; } = false;
+
+    // Store the previous Achievements reference
+    private List<AchievementDto>? _previousAchievements;
+
+    protected override void OnParametersSet() {
+        if (!ReferenceEquals(Achievements, _previousAchievements)) {
+            Closed = false;
+            _previousAchievements = Achievements;
+        }
+
+        base.OnParametersSet();
+    }
 }

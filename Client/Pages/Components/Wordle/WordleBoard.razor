@@ -29,9 +29,6 @@
         if (History != null) {
             foreach (var attempt in History) {
                 guesses.Add(attempt.Attempt);
-                foreach (var state in attempt.LettersState) {
-                    Console.WriteLine($"{state}");
-                }
                 evaluation.Add(attempt.LettersState.Select(e => e switch {
                     State.LetterGuessedCorrectPlace => CellState.Correct,
                     State.LetterGuessedIncorrectPlace => CellState.Present,
@@ -50,9 +47,6 @@
         if (History != null) {
             foreach (var attempt in History) {
                 guesses.Add(attempt.Attempt);
-                foreach (var state in attempt.LettersState) {
-                    Console.WriteLine($"{state}");
-                }
                 evaluation.Add(attempt.LettersState.Select(e => e switch {
                     State.LetterGuessedCorrectPlace => CellState.Correct,
                     State.LetterGuessedIncorrectPlace => CellState.Present,

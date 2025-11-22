@@ -6,28 +6,14 @@
 
 @inject HttpClient Http
 @inject ILocalStorageService LocalStorage
+@inject NavigationManager Navigation
+
+<PageTitle>New game</PageTitle>
 
 <PageTitle>New game</PageTitle>
 
 <div class="container">
-    @if (Game != null) {
-        <header>
-            <h1>New game</h1>
-            <p class="sub">
-                Guess the 5-letter word. You have <strong>6</strong> tries.
-                @if (Game.Category is not null) {
-                    <span> Category: <strong>@Game.Category</strong></span>
-                }
-            </p>
-        </header>
-
-        <main>
-            <WordleGame GameDto=@Game />
-        </main>
-    }
-    else {
-        <p>Loading new game...</p>
-    }
+    <p>Creating a new game…</p>
 </div>
 
 <style>
@@ -59,7 +45,10 @@
 
             var response = await Http.PostAsync("/api/games", null);
             response.EnsureSuccessStatusCode();
-            Game = await response.Content.ReadFromJsonAsync<GameDto>();
+            var game = await response.Content.ReadFromJsonAsync<GameDto>();
+            if (game != null) {
+                Navigation.NavigateTo($"/game/{game.Id}");
+            }
         }
         catch (Exception ex) {
             Console.WriteLine(ex.Message);

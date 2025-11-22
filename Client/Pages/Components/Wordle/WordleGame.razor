@@ -3,6 +3,7 @@
 @using Shared
 @using Shared.Dtos
 
+@inject NavigationManager Navigation
 @inject HttpClient Http
 @inject ILocalStorageService LocalStorage
 
@@ -14,10 +15,17 @@ else {
     <WordleBoard Cols="5" Rows="6" History=@GameDto?.Attempts />
 
     <section class="controls">
-        <WordleInput @bind-CurrentGuess="Current" HandleKeyDown=@HandleKeyDown SubmitGuess=@SubmitGuess />
+        <WordleInput @bind-CurrentGuess="Current"
+                     HandleKeyDown="@HandleKeyDown"
+                     SubmitGuess="@SubmitGuess"
+                     Disabled="@(GameDto?.GameStatus != GameStatus.InProgress)" />
         <WordleKeyboard KeyStates="@KeyStates" OnKeyPress="@HandleKeyPress" />
         <WordleStatus Message="@Message" />
         <WordleNewAchievements Achievements=@GameDto?.NewAchievements />
+        @if(GameDto?.GameStatus != GameStatus.InProgress)
+        {
+            <WordleFinished GameDto="@GameDto"/>
+        }
     </section>
 }
 
@@ -70,6 +78,15 @@ else {
             var response = await Http.PostAsJsonAsync($"/api/games/{GameDto?.Id}/attempt", Current);
             if (response.IsSuccessStatusCode) {
                 GameDto = await response.Content.ReadFromJsonAsync<GameDto>();
+                Current = "";
+            }
+            else if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+            {
+                var dict = await response.Content.ReadFromJsonAsync<Dictionary<string, string>>();
+
+                if (dict != null && dict.TryGetValue("message", out var message)) {
+                    Console.WriteLine("Message: " + message);
+                }
             }
         }
         catch (Exception ex) {
@@ -77,7 +94,6 @@ else {
         }
         finally {
             CalculateKeyStates();
-            Current = "";
         }
     }
 

@@ -4,7 +4,7 @@
 
 
 <tr class="hover:bg-gray-50">
-    <td class="border border-gray-300 px-4 py-2">
+    <td>
         @if (!string.IsNullOrEmpty(GameHistoryItem.Word)) {
             <span>@GameHistoryItem.Word</span>
         }
@@ -13,23 +13,23 @@
         }
     </td>
 
-    <td class="border border-gray-300 px-4 py-2">
+    <td>
         @GameHistoryItem.Attempts?.Count
     </td>
 
-    <td class="border border-gray-300 px-4 py-2">
+    <td>
         @GameHistoryItem.HardMode.ToString(CultureInfo.InvariantCulture)
     </td>
 
-    <td class="border border-gray-300 px-4 py-2">
+    <td>
         @GameHistoryItem.Hints.ToString(CultureInfo.InvariantCulture)
     </td>
 
-    <td class="border border-gray-300 px-4 py-2">
+    <td>
         @GameHistoryItem.GameStatus
     </td>
 
-    <td class="border border-gray-300 px-4 py-2">
+    <td>
         <a class="text-blue-600 hover:underline" href="/game/@GameHistoryItem.Id">Open</a>
     </td>
 </tr>

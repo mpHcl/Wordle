@@ -54,12 +54,12 @@ else {
                 new AuthenticationHeaderValue("Bearer", token);
 
             var result = await Http.GetFromJsonAsync<IEnumerable<GameDto>>(
-                $"/api/games?page={page}&pageSize=18"
+                $"/api/games?page={page}&pageSize=16"
             );
 
             gamesHistory = result;
 
-            HasNextPage = result?.Count() == 18;
+            HasNextPage = result?.Count() == 16;
         }
         catch (Exception ex)
         {
