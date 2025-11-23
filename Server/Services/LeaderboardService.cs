@@ -81,7 +81,7 @@ namespace Server.Services {
 
         public async Task<List<LeaderboardEntryDto>> GetLeaderboard(int page, int pageSize, string filter) {
             var leaderboard = context.Leaderboards.Include(l => l.User)
-                .Where(l => l.User!.UserName != null && l.User.UserName.Contains(filter))
+                .Where(l => l.User!.UserName != null && l.User.UserName.ToLower().Contains(filter.ToLower()))
                 .OrderByDescending(l => l.Points)
                 .ThenByDescending(l => l.WinPercentage)
                 .ThenBy(l => l.AverageGuesses)
