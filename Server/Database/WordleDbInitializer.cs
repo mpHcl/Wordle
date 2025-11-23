@@ -1,5 +1,24 @@
 ﻿namespace Server.Database {
+    /// <summary>
+    /// Provides data seeding functionality for initializing the Wordle database
+    /// with default categories, words, achievements, and validation entries.
+    /// </summary>
     public static class WordleDbInitializer {
+
+        /// <summary>
+        /// Seeds the Wordle database with initial data if it has not already been populated.
+        /// </summary>
+        /// <param name="dbContext">The database context used to access and modify Wordle data.</param>
+        /// <remarks>
+        /// This method ensures the database is created, then conditionally inserts:
+        /// <list type="bullet">
+        ///     <item><description>Default word categories.</description></item>
+        ///     <item><description>Default words grouped by category.</description></item>
+        ///     <item><description>Default achievement definitions.</description></item>
+        ///     <item><description>Validation dictionary words for guess verification.</description></item>
+        /// </list>
+        /// Data is only inserted if the corresponding tables are empty.
+        /// </remarks>
         public static void Seed(WordleDbContext dbContext) {
             dbContext.Database.EnsureCreated();
 
