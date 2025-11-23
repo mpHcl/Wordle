@@ -18,4 +18,5 @@ input {
     border-radius: 6px;
     border: none;
     cursor: pointer;
+    color: var(--text-color)
 }
