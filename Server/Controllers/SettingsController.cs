@@ -9,6 +9,9 @@ using System.Security.Claims;
 
 namespace Server.Controllers
 {
+    /// <summary>
+    /// Provides endpoints for retrieving and updating user Wordle settings.
+    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
     public class SettingsController(IWordleSettingsService wordleGameService) : ControllerBase
@@ -17,7 +20,19 @@ namespace Server.Controllers
         private readonly IWordleSettingsService _wordleGameService = wordleGameService 
             ?? throw new ArgumentNullException(nameof(wordleGameService));
 
-        // GET api/settings
+        /// <summary>
+        /// Retrieves the Wordle settings for the authenticated user.
+        /// </summary>
+        /// <remarks>
+        /// <b>GET</b> api/settings
+        ///
+        /// <para><b>Returns:</b></para>
+        /// <list type="bullet">
+        /// <item><description><b>200 OK</b> – User settings.</description></item>
+        /// <item><description><b>404 Not Found</b> – User settings not found.</description></item>
+        /// </list>
+        /// </remarks>
+        /// <returns>User settings.</returns>
         [HttpGet]
         [Authorize]
         public async Task<ActionResult<IEnumerable<WordleSettings>>> GetWordleSettings() {
@@ -32,7 +47,20 @@ namespace Server.Controllers
             }
         }
 
-        // POST api/settings
+        /// <summary>
+        /// Updates the Wordle settings for the authenticated user.
+        /// </summary>
+        /// <remarks>
+        /// <b>POST</b> api/settings
+        ///
+        /// <para><b>Returns:</b></para>
+        /// <list type="bullet">
+        /// <item><description><b>200 OK</b> – Settings updated.</description></item>
+        /// <item><description><b>404 Not Found</b> – User not found.</description></item>
+        /// </list>
+        /// </remarks>
+        /// <param name="settings">The updated settings.</param>
+        /// <returns>Status result.</returns>
         [HttpPost]
         [Authorize]
         public async Task<ActionResult<WordleSettings>> UpdateWordleSettings(SettingsDto settings) {

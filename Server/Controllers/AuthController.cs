@@ -15,6 +15,9 @@ using System.Text;
 
 
 namespace Server.Controllers {
+    /// <summary>
+    /// Provides authentication endpoints for user registration, login, and token refresh.
+    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
     public class AuthController(UserManager<WordleUser> userManager, WordleDbContext context, IConfiguration configuration) : ControllerBase {
@@ -25,7 +28,20 @@ namespace Server.Controllers {
         private readonly IConfiguration configuration = configuration
             ?? throw new ArgumentNullException(nameof(configuration));
 
-        // POST /api/auth/register
+        /// <summary>
+        /// Registers a new user.
+        /// </summary>
+        /// <remarks>
+        /// <b>POST</b> api/auth/register
+        ///
+        /// <para><b>Returns:</b></para>
+        /// <list type="bullet">
+        /// <item><description><b>200 OK</b> – User created.</description></item>
+        /// <item><description><b>400 Bad Request</b> – Validation errors.</description></item>
+        /// </list>
+        /// </remarks>
+        /// <param name="dto">Registration data.</param>
+        /// <returns>A status message.</returns>
         [HttpPost("register")]
         public async Task<IActionResult> Register(RegisterDto dto) {
             var user = new WordleUser { UserName = dto.UserName, Email = dto.Email };
@@ -38,7 +54,20 @@ namespace Server.Controllers {
             return Ok(new { Message = "User registered successfully" });
         }
 
-        // POST /api/auth/login
+        /// <summary>
+        /// Logs in a user and returns a JWT token along with user settings.
+        /// </summary>
+        /// <remarks>
+        /// <b>POST</b> api/auth/login
+        ///
+        /// <para><b>Returns:</b></para>
+        /// <list type="bullet">
+        /// <item><description><b>200 OK</b> – Token and settings.</description></item>
+        /// <item><description><b>401 Unauthorized</b> – Invalid credentials.</description></item>
+        /// </list>
+        /// </remarks>
+        /// <param name="dto">Login data.</param>
+        /// <returns>JWT token and settings.</returns>
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginDto dto) {
             var user = await _userManager.FindByEmailAsync(dto.Email);
@@ -85,7 +114,20 @@ namespace Server.Controllers {
             });
         }
 
-        // POST /api/auth/register
+        /// <summary>
+        /// Refreshes the user's authentication token if it is close to expiration.
+        /// </summary>
+        /// <remarks>
+        /// <b>GET</b> api/auth/refresh
+        ///
+        /// <para><b>Returns:</b></para>
+        /// <list type="bullet">
+        /// <item><description><b>200 OK</b> – New token issued.</description></item>
+        /// <item><description><b>400 Bad Request</b> – Token not near expiration.</description></item>
+        /// <item><description><b>401 Unauthorized</b> – Invalid or missing token.</description></item>
+        /// </list>
+        /// </remarks>
+        /// <returns>New JWT token.</returns>
         [HttpGet("refresh")]
         [Authorize]
         public async Task<IActionResult> RefreshToken() {
