@@ -16,8 +16,13 @@ namespace Server.Controllers {
         // GET api/leaderboard?page=1&pageSize=10
         [HttpGet]
         [Authorize]
-        public async Task<IActionResult> GetLeaderboard([FromQuery] int page = 1, [FromQuery] int pageSize = 10) {
-            return Ok(await _leaderboardService.GetLeaderboard(page, pageSize));
+        public async Task<IActionResult> GetLeaderboard([FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] string filter = "") {
+            if (filter.Equals("")) {
+                return Ok(await _leaderboardService.GetLeaderboard(page, pageSize));
+            }
+            else {
+                return Ok(await _leaderboardService.GetLeaderboard(page, pageSize, filter));
+            }
         }
     }
 }

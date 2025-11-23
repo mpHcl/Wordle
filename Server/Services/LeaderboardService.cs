@@ -78,5 +78,25 @@ namespace Server.Services {
 
             return await leaderboard.ToListAsync();
         }
+
+        public async Task<List<LeaderboardEntryDto>> GetLeaderboard(int page, int pageSize, string filter) {
+            var leaderboard = context.Leaderboards.Include(l => l.User)
+                .Where(l => l.User!.UserName != null && l.User.UserName.Contains(filter))
+                .OrderByDescending(l => l.Points)
+                .ThenByDescending(l => l.WinPercentage)
+                .ThenBy(l => l.AverageGuesses)
+                .Select(l => new LeaderboardEntryDto {
+                    Username = l.User!.UserName ?? "Anonymous",
+                    GamesPlayed = l.GamesPlayed,
+                    GamesWon = l.GamesWon,
+                    WinPercentage = l.WinPercentage,
+                    AverageGuesses = l.AverageGuesses,
+                    Points = l.Points
+                })
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize);
+
+            return await leaderboard.ToListAsync();
+        }
     }
 }

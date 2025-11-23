@@ -5,5 +5,6 @@ namespace Server.Services.Interfaces {
         Task AddLostGame(string userId);
         Task AddWonGame(string userId, bool hardMode, bool hints);
         Task<List<LeaderboardEntryDto>> GetLeaderboard(int page, int pageSize);
+        Task<List<LeaderboardEntryDto>> GetLeaderboard(int page, int pageSize, string filter);
     }
 }

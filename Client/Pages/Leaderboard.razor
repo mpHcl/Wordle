@@ -10,6 +10,20 @@
 <PageTitle>Leaderboard</PageTitle>
 
 <h1 class="text-2xl font-bold mb-4">Leaderboard</h1>
+
+<div class="mb-4">
+    <input type="text"
+           class="border p-2 rounded"
+           placeholder="Search user..."
+           @bind="searchTerm"
+           @bind:event="oninput" />
+
+    <button class="ml-2 p-2 bg-blue-500 text-light rounded button-search"
+            @onclick="Search">
+        Search
+    </button>
+</div>
+
 @if (leaderboardEntries != null) {
     <Client.Pages.Components.Leaderboard.Leaderboard LeaderboardEntries=leaderboardEntries />
     <div class="history-pagination">
@@ -32,8 +46,15 @@ else {
     <p>Loading</p>
 }
 
+<style>
+    .button-search {
+        background: linear-gradient(135deg, #102030, #303030)
+    }
+</style>
+
 @code {
     private IEnumerable<LeaderboardEntryDto>? leaderboardEntries;
+    private string searchTerm = "";
     private int page = 1;
 
     private bool HasNextPage = true;
@@ -49,9 +70,11 @@ else {
             Http.DefaultRequestHeaders.Authorization =
                 new AuthenticationHeaderValue("Bearer", token);
 
-            var result = await Http.GetFromJsonAsync<IEnumerable<LeaderboardEntryDto>>(
-                $"/api/leaderboard?page={page}&pageSize=16"
-            );
+            var url = $"/api/leaderboard?page={page}&pageSize=16";
+            if (!string.IsNullOrWhiteSpace(searchTerm)) {
+                url += $"&filter={Uri.EscapeDataString(searchTerm)}";
+            }
+            var result = await Http.GetFromJsonAsync<IEnumerable<LeaderboardEntryDto>>(url);
 
             leaderboardEntries = result;
 
@@ -73,6 +96,11 @@ else {
         if (page <= 1) return;
 
         page--;
+        await LoadPage();
+    }
+
+    private async Task Search() {
+        page = 1; // reset to first page for new search
         await LoadPage();
     }
 }
